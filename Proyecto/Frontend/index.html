@@ -1,14 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Lista de Tareas</title>
+    <link rel="stylesheet" href="styles/main.css"> <!-- Tu CSS -->
 </head>
 <body>
-    Universidad de Burgos X Tec de Monterrey
+    <h1>Mis Tareas</h1>
+    <ul id="task-list">
+        <!-- Aquí se insertarán las tareas desde JS -->
+    </ul>
 
-    
-    
+    <script>
+        // Función para cargar tareas desde el backend
+        async function cargarTareas() {
+            try {
+                const response = await fetch("/tasks");
+                const tareas = await response.json();
+                const taskList = document.getElementById("task-list");
+
+                tareas.forEach(tarea => {
+                    const li = document.createElement("li");
+                    li.textContent = `${tarea.titulo} - ${tarea.estado}`;
+                    
+                    // Clase para tareas completadas (para tu CSS)
+                    if (tarea.estado === "completada") {
+                        li.classList.add("completada");
+                    }
+
+                    taskList.appendChild(li);
+                });
+            } catch (error) {
+                console.error("Error al cargar tareas:", error);
+            }
+        }
+
+        // Llamamos a la función al cargar la página
+        cargarTareas();
+    </script>
 </body>
 </html>
