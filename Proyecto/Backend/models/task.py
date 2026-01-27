@@ -1,7 +1,13 @@
-from pydantic import BaseModel
-from typing import Optional
+class Task:
+    def __init__(self, id, titulo, estado):
+        self.id = id
+        self.titulo = titulo
+        self.estado = estado
 
-class Task(BaseModel):
-    id: Optional[int]
-    titulo: str
-    estado: str
+    def to_dict(self):
+        # Método para convertir a diccionario y poder devolverlo como JSON
+        return {
+            "id": self.id,
+            "titulo": self.titulo,
+            "estado": self.estado
+        }
