@@ -1,7 +1,6 @@
-# backend/app.py
-from models.task import Task
 from flask import Flask, render_template, jsonify, request
-from data.tasks_data import get_tasks, add_task  # Importamos nuestro almacenamiento
+from models.task import Task
+from data.task_data import get_tasks, add_task
 
 app = Flask(__name__, template_folder="../Frontend")
 
