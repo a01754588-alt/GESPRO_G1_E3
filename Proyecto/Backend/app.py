@@ -1,64 +1,344 @@
 from flask import Flask, render_template, jsonify, request
 from models.task import Task
-from data.task_data import get_tasks, add_task, update_task, delete_task
+from data.task_data import get_tasks, add_task, update_task, delete_task, get_task_by_id
 
 app = Flask(__name__, static_folder="../Frontend", template_folder="../Frontend")
 
-# Ruta principal
+# Ruta principal - sirve el HTML
 @app.route("/")
 def index():
     return render_template("index.html")
 
-# GET /tasks → devuelve todas las tareas
+# GET /tasks → devuelve todas las tareas ordenadas por tiempo
 @app.route("/tasks", methods=["GET"])
 def tasks_get():
-    return jsonify([task.to_dict() for task in get_tasks()])
+    try:
+        tasks = get_tasks()
+        # Convertir a formato JSON
+        tasks_data = [task.to_dict() for task in tasks]
+        return jsonify(tasks_data)
+    except Exception as e:
+        print(f"Error en GET /tasks: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# GET /tasks/<id> → devuelve una tarea específica
+@app.route("/tasks/<int:task_id>", methods=["GET"])
+def task_get(task_id):
+    try:
+        task = get_task_by_id(task_id)
+        if task:
+            return jsonify(task.to_dict())
+        else:
+            return jsonify({"error": "Tarea no encontrada"}), 404
+    except Exception as e:
+        print(f"Error en GET /tasks/{task_id}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # POST /tasks → crea una nueva tarea
 @app.route("/tasks", methods=["POST"])
 def tasks_post():
-    data = request.get_json()
-    
-    if not data or "titulo" not in data:
-        return jsonify({"error": "El campo 'titulo' es obligatorio"}), 400
-    
-    # Nuevos campos opcionales
-    puntos = data.get("puntos", 1)  # Cambié de 0 a 1 por defecto
-    asignado_a = data.get("asignado_a")
-    estado = data.get("estado", "TODO")  # Estado por defecto
-    
-    nueva_tarea = add_task(data["titulo"], puntos, asignado_a, estado)
-    return jsonify(nueva_tarea.to_dict()), 201
+    try:
+        data = request.get_json()
+        
+        # Validar datos requeridos
+        if not data or "titulo" not in data:
+            return jsonify({"error": "El campo 'titulo' es obligatorio"}), 400
+        
+        titulo = data.get("titulo", "").strip()
+        if not titulo:
+            return jsonify({"error": "El título no puede estar vacío"}), 400
+        
+        # Campos con valores por defecto
+        puntos = data.get("puntos", 1)
+        try:
+            puntos = int(puntos)
+            if puntos < 1:
+                puntos = 1
+            elif puntos > 10:
+                puntos = 10
+        except (ValueError, TypeError):
+            puntos = 1
+        
+        asignado_a = data.get("asignado_a")
+        if asignado_a:
+            asignado_a = asignado_a.strip()
+            if asignado_a == "":
+                asignado_a = None
+        
+        estado = data.get("estado", "TODO")
+        # Validar estado
+        estados_validos = ["TODO", "IN_PROGRESS", "DONE"]
+        if estado not in estados_validos:
+            estado = "TODO"
+        
+        estimacion_minutos = data.get("estimacion_minutos", 60)
+        try:
+            estimacion_minutos = int(estimacion_minutos)
+            if estimacion_minutos < 5:
+                estimacion_minutos = 5
+            elif estimacion_minutos > 480:
+                estimacion_minutos = 480
+        except (ValueError, TypeError):
+            estimacion_minutos = 60
+        
+        # Crear la tarea
+        nueva_tarea = add_task(
+            titulo=titulo,
+            puntos=puntos,
+            asignado_a=asignado_a,
+            estado=estado,
+            estimacion_minutos=estimacion_minutos
+        )
+        
+        return jsonify(nueva_tarea.to_dict()), 201
+        
+    except Exception as e:
+        print(f"Error en POST /tasks: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
-# PUT /tasks/<id> → actualiza una tarea (para cambiar estado)
+# PUT /tasks/<id> → actualiza una tarea (para cambiar estado o editar)
 @app.route("/tasks/<int:task_id>", methods=["PUT"])
 def task_update(task_id):
-    data = request.get_json()
-    
-    if not data:
-        return jsonify({"error": "No se enviaron datos para actualizar"}), 400
-    
-    tarea_actualizada = update_task(task_id, data)
-    
-    if tarea_actualizada:
-        return jsonify(tarea_actualizada.to_dict())
-    else:
-        return jsonify({"error": "Tarea no encontrada"}), 404
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No se enviaron datos para actualizar"}), 400
+        
+        # Validar que la tarea existe
+        task = get_task_by_id(task_id)
+        if not task:
+            return jsonify({"error": "Tarea no encontrada"}), 404
+        
+        # Preparar datos para actualización
+        update_data = {}
+        
+        # Validar y procesar cada campo
+        if 'titulo' in data:
+            titulo = data.get("titulo", "").strip()
+            if titulo:
+                update_data['titulo'] = titulo
+            else:
+                return jsonify({"error": "El título no puede estar vacío"}), 400
+        
+        if 'estado' in data:
+            estado = data.get("estado")
+            estados_validos = ["TODO", "IN_PROGRESS", "DONE"]
+            if estado in estados_validos:
+                update_data['estado'] = estado
+            else:
+                return jsonify({"error": "Estado inválido"}), 400
+        
+        if 'puntos' in data:
+            try:
+                puntos = int(data.get("puntos"))
+                if 1 <= puntos <= 10:
+                    update_data['puntos'] = puntos
+                else:
+                    return jsonify({"error": "Los puntos deben estar entre 1 y 10"}), 400
+            except (ValueError, TypeError):
+                return jsonify({"error": "Los puntos deben ser un número válido"}), 400
+        
+        if 'asignado_a' in data:
+            asignado_a = data.get("asignado_a")
+            if asignado_a is None:
+                update_data['asignado_a'] = None
+            else:
+                asignado_a = str(asignado_a).strip()
+                update_data['asignado_a'] = asignado_a if asignado_a else None
+        
+        if 'estimacion_minutos' in data:
+            try:
+                estimacion = int(data.get("estimacion_minutos"))
+                if 5 <= estimacion <= 480:
+                    update_data['estimacion_minutos'] = estimacion
+                else:
+                    return jsonify({"error": "La estimación debe estar entre 5 y 480 minutos"}), 400
+            except (ValueError, TypeError):
+                return jsonify({"error": "La estimación debe ser un número válido"}), 400
+        
+        # Si no hay datos válidos para actualizar
+        if not update_data:
+            return jsonify({"error": "No se proporcionaron datos válidos para actualizar"}), 400
+        
+        # Actualizar la tarea
+        tarea_actualizada = update_task(task_id, update_data)
+        
+        if tarea_actualizada:
+            return jsonify(tarea_actualizada.to_dict())
+        else:
+            return jsonify({"error": "Error al actualizar la tarea"}), 500
+            
+    except Exception as e:
+        print(f"Error en PUT /tasks/{task_id}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
 
 # DELETE /tasks/<id> → elimina una tarea
 @app.route("/tasks/<int:task_id>", methods=["DELETE"])
 def task_delete(task_id):
-    eliminada = delete_task(task_id)
-    
-    if eliminada:
-        return jsonify({"mensaje": f"Tarea {task_id} eliminada correctamente"})
-    else:
-        return jsonify({"error": "Tarea no encontrada"}), 404
+    try:
+        # Verificar que la tarea existe
+        task = get_task_by_id(task_id)
+        if not task:
+            return jsonify({"error": "Tarea no encontrada"}), 404
+        
+        # Eliminar la tarea
+        eliminada = delete_task(task_id)
+        
+        if eliminada:
+            return jsonify({
+                "mensaje": f"Tarea '{task.titulo}' eliminada correctamente",
+                "id": task_id
+            })
+        else:
+            return jsonify({"error": "Error al eliminar la tarea"}), 500
+            
+    except Exception as e:
+        print(f"Error en DELETE /tasks/{task_id}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# Ruta para obtener estadísticas
+@app.route("/stats", methods=["GET"])
+def get_stats():
+    try:
+        tasks = get_tasks()
+        
+        # Estadísticas por estado
+        todos = [t for t in tasks if t.estado == "TODO"]
+        in_progress = [t for t in tasks if t.estado == "IN_PROGRESS"]
+        dones = [t for t in tasks if t.estado == "DONE"]
+        
+        # Tiempo total por estado
+        tiempo_todo = sum(t.estimacion_minutos for t in todos)
+        tiempo_progress = sum(t.estimacion_minutos for t in in_progress)
+        tiempo_done = sum(t.estimacion_minutos for t in dones)
+        tiempo_total = tiempo_todo + tiempo_progress + tiempo_done
+        
+        # Tareas asignadas vs no asignadas
+        asignadas = [t for t in tasks if t.asignado_a]
+        no_asignadas = [t for t in tasks if not t.asignado_a]
+        
+        stats = {
+            "total_tareas": len(tasks),
+            "todo": len(todos),
+            "in_progress": len(in_progress),
+            "done": len(dones),
+            "tiempo_total": tiempo_total,
+            "tiempo_todo": tiempo_todo,
+            "tiempo_progress": tiempo_progress,
+            "tiempo_done": tiempo_done,
+            "asignadas": len(asignadas),
+            "no_asignadas": len(no_asignadas),
+            "promedio_puntos": sum(t.puntos for t in tasks) / len(tasks) if tasks else 0,
+            "promedio_tiempo": sum(t.estimacion_minutos for t in tasks) / len(tasks) if tasks else 0
+        }
+        
+        return jsonify(stats)
+        
+    except Exception as e:
+        print(f"Error en GET /stats: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# Ruta para buscar tareas
+@app.route("/tasks/search", methods=["GET"])
+def search_tasks():
+    try:
+        query = request.args.get('q', '').strip().lower()
+        if not query:
+            return jsonify([])
+        
+        tasks = get_tasks()
+        results = []
+        
+        for task in tasks:
+            # Buscar en título
+            if query in task.titulo.lower():
+                results.append(task.to_dict())
+                continue
+            
+            # Buscar en asignado
+            if task.asignado_a and query in task.asignado_a.lower():
+                results.append(task.to_dict())
+                continue
+            
+            # Buscar en estado
+            if query in task.estado.lower():
+                results.append(task.to_dict())
+        
+        return jsonify(results)
+        
+    except Exception as e:
+        print(f"Error en GET /tasks/search: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# Ruta para obtener tareas por responsable
+@app.route("/tasks/responsable/<string:responsable>", methods=["GET"])
+def tasks_by_responsable(responsable):
+    try:
+        tasks = get_tasks()
+        responsable_tasks = [t.to_dict() for t in tasks if t.asignado_a and t.asignado_a.lower() == responsable.lower()]
+        
+        return jsonify(responsable_tasks)
+        
+    except Exception as e:
+        print(f"Error en GET /tasks/responsable/{responsable}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# Middleware CORS manual para peticiones del mismo origen
+@app.after_request
+def add_cors_headers(response):
+    # Permitir peticiones desde el mismo origen (mismo puerto y dominio)
+    response.headers.add('Access-Control-Allow-Origin', '*')  # Para desarrollo
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+# Manejar preflight OPTIONS requests
+@app.route('/<path:path>', methods=['OPTIONS'])
+def options_handler(path):
+    response = jsonify()
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+
+# Manejar errores 404
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({"error": "Recurso no encontrado"}), 404
 
 # Manejar errores 405
 @app.errorhandler(405)
-def method_not_allowed(e):
+def method_not_allowed(error):
     return jsonify({"error": "Método no permitido"}), 405
 
+# Manejar errores 500
+@app.errorhandler(500)
+def internal_server_error(error):
+    return jsonify({"error": "Error interno del servidor"}), 500
+
+# Middleware para logging
+@app.before_request
+def before_request():
+    if request.endpoint and request.endpoint != 'static':
+        print(f"[{request.method}] {request.path}")
+
+@app.after_request
+def after_request_logging(response):
+    if request.endpoint and request.endpoint != 'static':
+        print(f"[{response.status_code}] {request.path}")
+    return response
+
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    print("=== Iniciando Gestor de Tareas ===")
+    print("Servidor corriendo en: http://localhost:5000")
+    print("Presiona Ctrl+C para detener")
+    print("=" * 40)
+    
+    # Iniciar el servidor
+    app.run(
+        debug=True,
+        port=5000,
+        host='0.0.0.0',  # Accesible desde cualquier IP en la red
+        threaded=True  # Manejar múltiples peticiones simultáneamente
+    )

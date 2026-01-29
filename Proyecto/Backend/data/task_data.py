@@ -30,22 +30,34 @@ def _cargar_tareas():
                     except (ValueError, TypeError):
                         puntos = 1
                     
+                    # Manejar estimación de tiempo (por defecto 60 minutos)
+                    estimacion = t.get('estimacion_minutos', 60)
+                    try:
+                        estimacion = int(estimacion)
+                        if estimacion < 5:
+                            estimacion = 5  # Mínimo 5 minutos
+                        elif estimacion > 480:
+                            estimacion = 480  # Máximo 8 horas (480 minutos)
+                    except (ValueError, TypeError):
+                        estimacion = 60
+                    
                     tareas.append(Task(
                         t['id'],
                         t['titulo'],
                         estado,
                         puntos,
-                        t.get('asignado_a')
+                        t.get('asignado_a'),
+                        estimacion
                     ))
                 return tareas
     except Exception as e:
         print(f"Error cargando tareas: {e}")
     
-    # Datos iniciales
+    # Datos iniciales con estimaciones de tiempo
     return [
-        Task(1, "Crear backend mínimo operativo", "TODO", 2, "Núvo"),
-        Task(2, "Crear frontend mínimo operativo", "TODO", 2, "Daniel"),
-        Task(3, "Conectar frontend con backend", "TODO", 3, None)
+        Task(1, "Crear backend mínimo operativo", "TODO", 2, "Núvo", 120),
+        Task(2, "Crear frontend mínimo operativo", "TODO", 2, "Daniel", 180),
+        Task(3, "Conectar frontend con backend", "TODO", 3, None, 90)
     ]
 
 def _guardar_tareas(tareas):
@@ -64,11 +76,12 @@ _tasks = _cargar_tareas()
 _next_id = max([t.id for t in _tasks]) + 1 if _tasks else 1
 
 def get_tasks():
-    return _tasks
+    # Ordenar por estimación de tiempo (de mayor a menor)
+    return sorted(_tasks, key=lambda x: x.estimacion_minutos, reverse=True)
 
-def add_task(titulo, puntos=1, asignado_a=None, estado="TODO"):
+def add_task(titulo, puntos=1, asignado_a=None, estado="TODO", estimacion_minutos=60):
     global _next_id, _tasks
-    nueva_tarea = Task(_next_id, titulo, estado, puntos, asignado_a)
+    nueva_tarea = Task(_next_id, titulo, estado, puntos, asignado_a, estimacion_minutos)
     _next_id += 1
     _tasks.append(nueva_tarea)
     _guardar_tareas(_tasks)
@@ -92,6 +105,13 @@ def update_task(task_id, nuevos_datos):
                     pass  # Mantener el valor actual si es inválido
             if 'asignado_a' in nuevos_datos:
                 task.asignado_a = nuevos_datos['asignado_a']
+            if 'estimacion_minutos' in nuevos_datos:
+                try:
+                    estimacion = int(nuevos_datos['estimacion_minutos'])
+                    if 5 <= estimacion <= 480:
+                        task.estimacion_minutos = estimacion
+                except (ValueError, TypeError):
+                    pass
             
             _guardar_tareas(_tasks)
             return task

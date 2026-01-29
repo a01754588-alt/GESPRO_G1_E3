@@ -53,9 +53,21 @@
 
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 15px;
             margin-bottom: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .form-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .form-group {
@@ -67,6 +79,7 @@
             margin-bottom: 5px;
             color: #555;
             font-weight: bold;
+            font-size: 0.9rem;
         }
 
         input, select {
@@ -90,6 +103,7 @@
             font-size: 16px;
             cursor: pointer;
             transition: background 0.3s;
+            margin-top: 10px;
         }
 
         .btn-crear:hover {
@@ -132,6 +146,7 @@
             margin-bottom: 12px;
             border-left: 4px solid;
             transition: transform 0.2s;
+            position: relative;
         }
 
         .tarea-card:hover {
@@ -155,6 +170,8 @@
             justify-content: space-between;
             margin-bottom: 8px;
             font-size: 0.9rem;
+            flex-wrap: wrap;
+            gap: 5px;
         }
 
         .puntos-badge {
@@ -166,9 +183,21 @@
             font-size: 0.8rem;
         }
 
+        .tiempo-badge {
+            background: #2196F3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
         .asignado {
             color: #666;
             font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
         .tarea-acciones {
@@ -197,6 +226,21 @@
         .btn-progress { background: #ff9800; }
         .btn-done { background: #4CAF50; }
 
+        .btn-editar {
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.2s;
+        }
+
+        .btn-editar:hover {
+            background: #0b7dda;
+        }
+
         .btn-eliminar {
             background: #dc3545;
             color: white;
@@ -205,12 +249,22 @@
             padding: 6px 10px;
             cursor: pointer;
             font-size: 0.9rem;
-            margin-left: 5px;
             transition: background 0.2s;
         }
 
         .btn-eliminar:hover {
             background: #c82333;
+        }
+
+        .tarea-acciones-superiores {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .tarea-acciones-superiores button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
         }
 
         .mensaje-vacio {
@@ -220,12 +274,108 @@
             font-style: italic;
         }
 
+        /* Modal de edición */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-contenido {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .modal-titulo {
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .modal-cerrar {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-cerrar:hover {
+            color: #333;
+        }
+
+        .modal-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .modal-form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-form-group label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .modal-botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-guardar {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-guardar:hover {
+            background: #45a049;
+        }
+
+        .btn-cancelar {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .btn-cancelar:hover {
+            background: #5a6268;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-            
             .tablero {
                 grid-template-columns: 1fr;
             }
@@ -266,16 +416,97 @@
             margin-top: 10px;
             color: #666;
             font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        .tiempo-total {
+            text-align: center;
+            margin-top: 5px;
+            color: #2196F3;
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* Orden de tareas */
+        .orden-control {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .orden-selector {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .orden-selector select {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background: white;
+            font-size: 0.85rem;
+        }
+
+        small {
+            color: #666;
+            font-size: 0.8rem;
+            margin-top: 3px;
         }
     </style>
 </head>
 <body>
+    <!-- Modal de edición -->
+    <div id="modal-edicion" class="modal">
+        <div class="modal-contenido">
+            <div class="modal-header">
+                <h3 class="modal-titulo">✏️ Editar Tarea</h3>
+                <button class="modal-cerrar" onclick="cerrarModal()">×</button>
+            </div>
+            <form id="form-edicion" class="modal-form" onsubmit="guardarEdicion(event)">
+                <input type="hidden" id="editar-id">
+                <div class="modal-form-group">
+                    <label for="editar-titulo">Título *</label>
+                    <input type="text" id="editar-titulo" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editar-puntos">Puntos (1-10)</label>
+                    <input type="number" id="editar-puntos" min="1" max="10" required>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editar-tiempo">Tiempo estimado (minutos)</label>
+                    <input type="number" id="editar-tiempo" min="5" max="480" required>
+                    <small>Entre 5 y 480 minutos (8 horas)</small>
+                </div>
+                <div class="modal-form-group">
+                    <label for="editar-asignado">Asignado a</label>
+                    <input type="text" id="editar-asignado" placeholder="Nombre del responsable">
+                </div>
+                <div class="modal-form-group">
+                    <label for="editar-estado">Estado</label>
+                    <select id="editar-estado">
+                        <option value="TODO">TODO</option>
+                        <option value="IN_PROGRESS">IN PROGRESS</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+                </div>
+                <div class="modal-botones">
+                    <button type="button" class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn-guardar">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Notificación flotante -->
     <div id="notificacion" class="notificacion"></div>
 
     <div class="container">
         <header>
             <h1>📋 Gestor de Tareas</h1>
+            <p>Organiza, prioriza y asigna tareas con tiempo estimado</p>
         </header>
 
         <!-- Formulario -->
@@ -294,14 +525,20 @@
                 </div>
                 
                 <div class="form-group">
-                    <label for="asignado">Asignado a (opcional)</label>
+                    <label for="tiempo">Tiempo estimado (minutos)</label>
+                    <input type="number" id="tiempo" min="5" max="480" value="60">
+                    <small>5-480 min (8h)</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="asignado">Asignado a</label>
                     <input type="text" id="asignado" placeholder="Ej: Juan">
                 </div>
                 
                 <div class="form-group">
                     <label for="estado">Estado inicial</label>
                     <select id="estado">
-                        <option value="TODO">TO DO</option>
+                        <option value="TODO">TODO</option>
                         <option value="IN_PROGRESS">IN PROGRESS</option>
                         <option value="DONE">DONE</option>
                     </select>
@@ -313,16 +550,29 @@
             </button>
         </div>
 
-        <!-- Contador de tareas -->
+        <!-- Contadores -->
         <div class="contador-tareas" id="contador-tareas">
-            Total: 0 tareas | TO DO: 0 | IN PROGRESS: 0 | DONE: 0
+            Total: 0 tareas | TODO: 0 | IN PROGRESS: 0 | DONE: 0
+        </div>
+        <div class="tiempo-total" id="tiempo-total">
+            Tiempo total estimado: 0 minutos
         </div>
 
         <!-- Tablero Kanban -->
         <div class="tablero">
             <!-- Columna TODO -->
             <div class="columna todo">
-                <div class="columna-header">📝 TO DO</div>
+                <div class="orden-control">
+                    <div class="columna-header">📝 TODO</div>
+                    <div class="orden-selector">
+                        <select id="orden-todo" onchange="cambiarOrden('TODO', this.value)">
+                            <option value="tiempo-desc">Mayor tiempo primero</option>
+                            <option value="tiempo-asc">Menor tiempo primero</option>
+                            <option value="puntos-desc">Mayor puntos primero</option>
+                            <option value="puntos-asc">Menor puntos primero</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="lista-todo" class="tareas-columna">
                     <!-- Tareas TODO se cargarán aquí -->
                 </div>
@@ -330,7 +580,17 @@
 
             <!-- Columna IN PROGRESS -->
             <div class="columna progress">
-                <div class="columna-header">⚙️ IN PROGRESS</div>
+                <div class="orden-control">
+                    <div class="columna-header">⚙️ IN PROGRESS</div>
+                    <div class="orden-selector">
+                        <select id="orden-progress" onchange="cambiarOrden('IN_PROGRESS', this.value)">
+                            <option value="tiempo-desc">Mayor tiempo primero</option>
+                            <option value="tiempo-asc">Menor tiempo primero</option>
+                            <option value="puntos-desc">Mayor puntos primero</option>
+                            <option value="puntos-asc">Menor puntos primero</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="lista-progress" class="tareas-columna">
                     <!-- Tareas IN PROGRESS se cargarán aquí -->
                 </div>
@@ -338,7 +598,17 @@
 
             <!-- Columna DONE -->
             <div class="columna done">
-                <div class="columna-header">✅ DONE</div>
+                <div class="orden-control">
+                    <div class="columna-header">✅ DONE</div>
+                    <div class="orden-selector">
+                        <select id="orden-done" onchange="cambiarOrden('DONE', this.value)">
+                            <option value="tiempo-desc">Mayor tiempo primero</option>
+                            <option value="tiempo-asc">Menor tiempo primero</option>
+                            <option value="puntos-desc">Mayor puntos primero</option>
+                            <option value="puntos-asc">Menor puntos primero</option>
+                        </select>
+                    </div>
+                </div>
                 <div id="lista-done" class="tareas-columna">
                     <!-- Tareas DONE se cargarán aquí -->
                 </div>
@@ -349,6 +619,11 @@
     <script>
         // Estado global
         let tareas = [];
+        let ordenColumnas = {
+            'TODO': 'tiempo-desc',
+            'IN_PROGRESS': 'tiempo-desc', 
+            'DONE': 'tiempo-desc'
+        };
         
         // Cargar tareas al iniciar
         document.addEventListener('DOMContentLoaded', () => {
@@ -386,6 +661,7 @@
             const puntos = parseInt(document.getElementById('puntos').value) || 1;
             const asignado = document.getElementById('asignado').value.trim();
             const estado = document.getElementById('estado').value;
+            const tiempo = parseInt(document.getElementById('tiempo').value) || 60;
             
             if (!titulo) {
                 mostrarNotificacion('Por favor, escribe un título para la tarea', true);
@@ -395,6 +671,11 @@
             
             if (puntos < 1 || puntos > 10) {
                 mostrarNotificacion('Los puntos deben estar entre 1 y 10', true);
+                return;
+            }
+            
+            if (tiempo < 5 || tiempo > 480) {
+                mostrarNotificacion('El tiempo debe estar entre 5 y 480 minutos', true);
                 return;
             }
             
@@ -408,7 +689,8 @@
                         titulo: titulo,
                         puntos: puntos,
                         asignado_a: asignado || null,
-                        estado: estado
+                        estado: estado,
+                        estimacion_minutos: tiempo
                     })
                 });
                 
@@ -416,18 +698,21 @@
                     const nuevaTarea = await response.json();
                     tareas.push(nuevaTarea);
                     renderizarTablero();
-                    mostrarNotificacion(`Tarea "${titulo.substring(0, 30)}${titulo.length > 30 ? '...' : ''}" creada`);
+                    mostrarNotificacion(`✅ Tarea "${titulo.substring(0, 30)}${titulo.length > 30 ? '...' : ''}" creada`);
                     
-                    // Limpiar formulario (solo título)
+                    // Limpiar formulario
                     document.getElementById('titulo').value = '';
+                    document.getElementById('puntos').value = '1';
+                    document.getElementById('tiempo').value = '60';
+                    document.getElementById('asignado').value = '';
                     document.getElementById('titulo').focus();
                 } else {
                     const error = await response.json();
-                    mostrarNotificacion(`Error: ${error.error}`, true);
+                    mostrarNotificacion(`❌ Error: ${error.error}`, true);
                 }
             } catch (error) {
                 console.error('Error al crear tarea:', error);
-                mostrarNotificacion('Error al conectar con el servidor', true);
+                mostrarNotificacion('❌ Error al conectar con el servidor', true);
             }
         }
         
@@ -442,13 +727,13 @@
                 console.error('Error al cargar tareas:', error);
                 // Datos de ejemplo si falla
                 tareas = [
-                    { id: 1, titulo: "Crear backend mínimo operativo", estado: "TO }DO", puntos: 2, asignado_a: "Núvo" },
-                    { id: 2, titulo: "Crear frontend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Daniel" },
-                    { id: 3, titulo: "Conectar frontend con backend", estado: "IN_PROGRESS", puntos: 3, asignado_a: null },
-                    { id: 4, titulo: "Probar la aplicación completa", estado: "DONE", puntos: 1, asignado_a: "Equipo" }
+                    { id: 1, titulo: "Crear backend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Núvo", estimacion_minutos: 120 },
+                    { id: 2, titulo: "Crear frontend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Daniel", estimacion_minutos: 180 },
+                    { id: 3, titulo: "Conectar frontend con backend", estado: "IN_PROGRESS", puntos: 3, asignado_a: null, estimacion_minutos: 90 },
+                    { id: 4, titulo: "Probar la aplicación completa", estado: "DONE", puntos: 1, asignado_a: "Equipo", estimacion_minutos: 60 }
                 ];
                 renderizarTablero();
-                mostrarNotificacion('Usando datos de ejemplo - Servidor no disponible', true);
+                mostrarNotificacion('⚠️ Usando datos de ejemplo - Servidor no disponible', true);
             }
         }
         
@@ -464,20 +749,60 @@
             const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS');
             const tareasDone = tareas.filter(t => t.estado === 'DONE');
             
-            // Renderizar cada columna
-            renderizarColumna('lista-todo', tareasTodo);
-            renderizarColumna('lista-progress', tareasProgress);
-            renderizarColumna('lista-done', tareasDone);
+            // Ordenar cada columna según su configuración
+            const todoOrdenadas = ordenarTareas(tareasTodo, ordenColumnas['TODO']);
+            const progressOrdenadas = ordenarTareas(tareasProgress, ordenColumnas['IN_PROGRESS']);
+            const doneOrdenadas = ordenarTareas(tareasDone, ordenColumnas['DONE']);
             
-            // Actualizar contador
-            actualizarContador(tareasTodo.length, tareasProgress.length, tareasDone.length);
+            // Renderizar cada columna
+            renderizarColumna('lista-todo', todoOrdenadas);
+            renderizarColumna('lista-progress', progressOrdenadas);
+            renderizarColumna('lista-done', doneOrdenadas);
+            
+            // Actualizar contadores
+            actualizarContadores(tareasTodo.length, tareasProgress.length, tareasDone.length);
+            
+            // Calcular tiempo total
+            const tiempoTotal = tareas.reduce((total, t) => total + (t.estimacion_minutos || 0), 0);
+            const horas = Math.floor(tiempoTotal / 60);
+            const minutos = tiempoTotal % 60;
+            
+            let tiempoTexto = `⏱️ Tiempo total estimado: ${tiempoTotal} minutos`;
+            if (horas > 0) {
+                tiempoTexto += ` (${horas}h ${minutos}m)`;
+            }
+            document.getElementById('tiempo-total').textContent = tiempoTexto;
         }
         
-        // Función para actualizar el contador
-        function actualizarContador(todo, progress, done) {
+        // Función para ordenar tareas según criterio
+        function ordenarTareas(tareas, criterio) {
+            const tareasCopia = [...tareas];
+            
+            switch(criterio) {
+                case 'tiempo-desc':
+                    return tareasCopia.sort((a, b) => (b.estimacion_minutos || 0) - (a.estimacion_minutos || 0));
+                case 'tiempo-asc':
+                    return tareasCopia.sort((a, b) => (a.estimacion_minutos || 0) - (b.estimacion_minutos || 0));
+                case 'puntos-desc':
+                    return tareasCopia.sort((a, b) => (b.puntos || 0) - (a.puntos || 0));
+                case 'puntos-asc':
+                    return tareasCopia.sort((a, b) => (a.puntos || 0) - (b.puntos || 0));
+                default:
+                    return tareasCopia;
+            }
+        }
+        
+        // Cambiar orden de una columna
+        function cambiarOrden(estado, criterio) {
+            ordenColumnas[estado] = criterio;
+            renderizarTablero();
+        }
+        
+        // Función para actualizar los contadores
+        function actualizarContadores(todo, progress, done) {
             const total = todo + progress + done;
             document.getElementById('contador-tareas').textContent = 
-                `Total: ${total} tareas | TODO: ${todo} | IN PROGRESS: ${progress} | DONE: ${done}`;
+                `📊 Total: ${total} tareas | TODO: ${todo} | IN PROGRESS: ${progress} | DONE: ${done}`;
         }
         
         // Función para renderizar una columna
@@ -501,12 +826,20 @@
             div.className = 'tarea-card';
             div.dataset.id = tarea.id;
             
+            // Formatear tiempo
+            const horas = Math.floor(tarea.estimacion_minutos / 60);
+            const minutos = tarea.estimacion_minutos % 60;
+            let tiempoTexto = `${tarea.estimacion_minutos} min`;
+            if (horas > 0) {
+                tiempoTexto = `${horas}h ${minutos}m`;
+            }
+            
             // Crear botones según el estado actual
             let botones = '';
             
             // Solo mostrar botones para mover a estados diferentes
             if (tarea.estado !== 'TODO') {
-                botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TO DO</button>`;
+                botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TODO</button>`;
             }
             if (tarea.estado !== 'IN_PROGRESS') {
                 botones += `<button class="btn-mover btn-progress" onclick="moverTarea(${tarea.id}, 'IN_PROGRESS')">⚙️ PROGRESS</button>`;
@@ -515,6 +848,9 @@
                 botones += `<button class="btn-mover btn-done" onclick="moverTarea(${tarea.id}, 'DONE')">✅ DONE</button>`;
             }
             
+            // Botón para editar
+            botones += `<button class="btn-editar" onclick="abrirModalEdicion(${tarea.id})" title="Editar tarea">✏️ Editar</button>`;
+            
             // Botón para eliminar
             botones += `<button class="btn-eliminar" onclick="eliminarTarea(${tarea.id})" title="Eliminar tarea">🗑️</button>`;
             
@@ -522,7 +858,8 @@
                 <div class="tarea-titulo">${tarea.titulo}</div>
                 <div class="tarea-info">
                     <span class="puntos-badge">${tarea.puntos} ${tarea.puntos === 1 ? 'punto' : 'puntos'}</span>
-                    ${tarea.asignado_a ? `<span class="asignado">👤 ${tarea.asignado_a}</span>` : ''}
+                    <span class="tiempo-badge">${tiempoTexto}</span>
+                    ${tarea.asignado_a ? `<span class="asignado">👤 ${tarea.asignado_a}</span>` : '<span class="asignado">👤 Sin asignar</span>'}
                 </div>
                 <div class="tarea-acciones">
                     ${botones}
@@ -555,18 +892,116 @@
                     // Actualizar la tarea localmente
                     tarea.estado = nuevoEstado;
                     renderizarTablero();
-                    mostrarNotificacion(`Tarea movida a ${nuevoEstado}`);
+                    mostrarNotificacion(`↔️ Tarea movida a ${nuevoEstado}`);
                 } else {
                     const error = await response.json();
-                    mostrarNotificacion(`Error: ${error.error}`, true);
+                    mostrarNotificacion(`❌ Error: ${error.error}`, true);
                 }
             } catch (error) {
                 console.error('Error al mover tarea:', error);
-                mostrarNotificacion('Error al conectar con el servidor', true);
+                mostrarNotificacion('❌ Error al conectar con el servidor', true);
             }
         }
         
-        // Función para eliminar tarea
+        // FUNCIONES PARA EDITAR TAREAS
+        
+        // Abrir modal de edición
+        async function abrirModalEdicion(taskId) {
+            try {
+                const tarea = tareas.find(t => t.id === taskId);
+                if (!tarea) {
+                    mostrarNotificacion('Tarea no encontrada', true);
+                    return;
+                }
+                
+                // Cargar datos en el formulario
+                document.getElementById('editar-id').value = tarea.id;
+                document.getElementById('editar-titulo').value = tarea.titulo;
+                document.getElementById('editar-puntos').value = tarea.puntos;
+                document.getElementById('editar-tiempo').value = tarea.estimacion_minutos;
+                document.getElementById('editar-asignado').value = tarea.asignado_a || '';
+                document.getElementById('editar-estado').value = tarea.estado;
+                
+                // Mostrar modal
+                document.getElementById('modal-edicion').style.display = 'flex';
+                document.getElementById('editar-titulo').focus();
+                
+            } catch (error) {
+                console.error('Error al abrir modal de edición:', error);
+                mostrarNotificacion('❌ Error al cargar datos de la tarea', true);
+            }
+        }
+        
+        // Cerrar modal
+        function cerrarModal() {
+            document.getElementById('modal-edicion').style.display = 'none';
+            document.getElementById('form-edicion').reset();
+        }
+        
+        // Guardar cambios de edición
+        async function guardarEdicion(event) {
+            event.preventDefault();
+            
+            const taskId = parseInt(document.getElementById('editar-id').value);
+            const titulo = document.getElementById('editar-titulo').value.trim();
+            const puntos = parseInt(document.getElementById('editar-puntos').value);
+            const tiempo = parseInt(document.getElementById('editar-tiempo').value);
+            const asignado = document.getElementById('editar-asignado').value.trim();
+            const estado = document.getElementById('editar-estado').value;
+            
+            // Validaciones
+            if (!titulo) {
+                mostrarNotificacion('El título es obligatorio', true);
+                return;
+            }
+            
+            if (puntos < 1 || puntos > 10) {
+                mostrarNotificacion('Los puntos deben estar entre 1 y 10', true);
+                return;
+            }
+            
+            if (tiempo < 5 || tiempo > 480) {
+                mostrarNotificacion('El tiempo debe estar entre 5 y 480 minutos', true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        puntos: puntos,
+                        estimacion_minutos: tiempo,
+                        asignado_a: asignado || null,
+                        estado: estado
+                    })
+                });
+                
+                if (response.ok) {
+                    const tareaActualizada = await response.json();
+                    
+                    // Actualizar en el array local
+                    const index = tareas.findIndex(t => t.id === taskId);
+                    if (index !== -1) {
+                        tareas[index] = tareaActualizada;
+                    }
+                    
+                    renderizarTablero();
+                    cerrarModal();
+                    mostrarNotificacion(`✅ Tarea actualizada correctamente`);
+                } else {
+                    const error = await response.json();
+                    mostrarNotificacion(`❌ Error: ${error.error}`, true);
+                }
+            } catch (error) {
+                console.error('Error al editar tarea:', error);
+                mostrarNotificacion('❌ Error al conectar con el servidor', true);
+            }
+        }
+        
         // Función para eliminar tarea
         async function eliminarTarea(taskId) {
             const tarea = tareas.find(t => t.id === taskId);
@@ -586,22 +1021,36 @@
                     // Eliminar de la lista local
                     tareas = tareas.filter(t => t.id !== taskId);
                     renderizarTablero();
-                    mostrarNotificacion(result.mensaje || `Tarea eliminada: "${tarea.titulo.substring(0, 30)}${tarea.titulo.length > 30 ? '...' : ''}"`);
+                    mostrarNotificacion(result.mensaje || `🗑️ Tarea eliminada: "${tarea.titulo.substring(0, 30)}${tarea.titulo.length > 30 ? '...' : ''}"`);
                 } else {
                     const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
-                    mostrarNotificacion(`Error: ${error.error}`, true);
+                    mostrarNotificacion(`❌ Error: ${error.error}`, true);
                 }
             } catch (error) {
                 console.error('Error al eliminar tarea:', error);
-                mostrarNotificacion('Error al conectar con el servidor', true);
+                mostrarNotificacion('❌ Error al conectar con el servidor', true);
             }
-}
+        }
         
         // Actualizar periódicamente (cada 60 segundos)
         setInterval(cargarTareas, 60000);
         
         // También actualizar cuando la ventana gana foco
         window.addEventListener('focus', cargarTareas);
+        
+        // Cerrar modal con ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('modal-edicion').style.display === 'flex') {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar modal haciendo clic fuera
+        document.getElementById('modal-edicion').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-edicion') {
+                cerrarModal();
+            }
+        });
     </script>
 </body>
 </html>
