@@ -411,24 +411,201 @@
             background: #f44336;
         }
 
-        .contador-tareas {
-            text-align: center;
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.9rem;
+        .contadores-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
             margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .contador-tareas, .tiempo-total, .wip-container {
+            background: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .contador-tareas {
+            flex: 2;
+            min-width: 300px;
+            border-left: 4px solid #4CAF50;
         }
 
         .tiempo-total {
-            text-align: center;
-            margin-top: 5px;
-            color: #2196F3;
+            flex: 2;
+            min-width: 250px;
+            border-left: 4px solid #2196F3;
             font-weight: bold;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
+            color: #2196F3;
         }
 
-        /* Orden de tareas */
+        .wip-container {
+            flex: 1;
+            min-width: 250px;
+            border-left: 4px solid #ff9800;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .wip-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .wip-limite {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .wip-input {
+            width: 60px;
+            padding: 5px 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .wip-input:focus {
+            outline: none;
+            border-color: #ff9800;
+        }
+
+        .wip-info {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 3px;
+        }
+
+        .wip-flexible {
+            color: #ff9800;
+            font-weight: bold;
+        }
+
+        .wip-actual {
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .wip-actual:last-child {
+            border-bottom: none;
+        }
+
+        .wip-value {
+            font-weight: bold;
+        }
+
+        .wip-ok {
+            color: #4CAF50;
+        }
+
+        .wip-warning {
+            color: #ff9800;
+        }
+
+        .wip-flexible-warning {
+            color: #ff5722;
+        }
+
+        .wip-danger {
+            color: #f44336;
+            font-weight: bold;
+        }
+
+        .wip-progress-bar {
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            margin-top: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .wip-progress-fill {
+            height: 100%;
+            background: #4CAF50;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .wip-progress-warning {
+            background: #ff9800;
+        }
+
+        .wip-progress-flexible {
+            background: #ff5722;
+        }
+
+        .wip-progress-danger {
+            background: #f44336;
+        }
+
+        .wip-progress-marker {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 2px;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .wip-status {
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+            padding: 5px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+
+        .wip-status-ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .wip-status-warning {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .wip-status-flexible {
+            background: #fbe9e7;
+            color: #d84315;
+        }
+
+        .wip-status-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn-wip {
+            background: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-wip:hover {
+            background: #f57c00;
+        }
+
         .orden-control {
             display: flex;
             justify-content: space-between;
@@ -454,6 +631,16 @@
             color: #666;
             font-size: 0.8rem;
             margin-top: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .contadores-container {
+                flex-direction: column;
+            }
+            
+            .contador-tareas, .tiempo-total, .wip-container {
+                min-width: 100%;
+            }
         }
     </style>
 </head>
@@ -505,8 +692,8 @@
 
     <div class="container">
         <header>
-            <h1>📋 Gestor de Tareas</h1>
-            <p>Organiza, prioriza y asigna tareas con tiempo estimado</p>
+            <h1>📋 Gestor de Tareas Kanban</h1>
+            <p>Organiza, prioriza y controla el trabajo en progreso con límite flexible</p>
         </header>
 
         <!-- Formulario -->
@@ -550,12 +737,43 @@
             </button>
         </div>
 
-        <!-- Contadores -->
-        <div class="contador-tareas" id="contador-tareas">
-            Total: 0 tareas | TODO: 0 | IN PROGRESS: 0 | DONE: 0
-        </div>
-        <div class="tiempo-total" id="tiempo-total">
-            Tiempo total estimado: 0 minutos
+        <!-- Contadores y WIP -->
+        <div class="contadores-container">
+            <div class="contador-tareas" id="contador-tareas">
+                📊 Total: 0 tareas | TODO: 0 | IN PROGRESS: 0 | DONE: 0
+            </div>
+            <div class="tiempo-total" id="tiempo-total">
+                ⏱️ Tiempo total estimado: 0 minutos
+            </div>
+            <div class="wip-container" id="wip-container">
+                <div class="wip-header">
+                    <span>🚦 Límite WIP Flexible</span>
+                </div>
+                <div class="wip-limite">
+                    <span>Límite base:</span>
+                    <input type="number" id="wip-limit" class="wip-input" min="1" max="20" value="5">
+                    <button class="btn-wip" onclick="actualizarWIP()">Actualizar</button>
+                </div>
+                <div class="wip-info">
+                    <span>Límite flexible: <span id="wip-flexible" class="wip-flexible">5 (+10% = 5)</span></span>
+                </div>
+                <div class="wip-actual">
+                    <span>Tareas en progreso:</span>
+                    <span id="wip-actual" class="wip-value">0</span>
+                </div>
+                <div class="wip-actual">
+                    <span>Porcentaje (base):</span>
+                    <span id="wip-porcentaje" class="wip-value">0%</span>
+                </div>
+                <div class="wip-progress-bar">
+                    <div id="wip-progress-fill" class="wip-progress-fill" style="width: 0%"></div>
+                    <div id="wip-marker-base" class="wip-progress-marker" style="left: 100%"></div>
+                    <div id="wip-marker-flexible" class="wip-progress-marker" style="left: 110%"></div>
+                </div>
+                <div id="wip-status" class="wip-status wip-status-ok">
+                    ✅ Dentro del límite base
+                </div>
+            </div>
         </div>
 
         <!-- Tablero Kanban -->
@@ -625,8 +843,14 @@
             'DONE': 'tiempo-desc'
         };
         
+        // Límite WIP (Work In Progress) - Cambiado a 5 para ver mejor el 10%
+        let wipLimit = parseInt(localStorage.getItem('wipLimit')) || 5;
+        
         // Cargar tareas al iniciar
         document.addEventListener('DOMContentLoaded', () => {
+            // Cargar límite WIP del localStorage
+            document.getElementById('wip-limit').value = wipLimit;
+            
             cargarTareas();
             // Permitir enviar formulario con Enter
             document.getElementById('titulo').addEventListener('keypress', (e) => {
@@ -635,7 +859,163 @@
                     crearTarea();
                 }
             });
+            
+            // Permitir actualizar WIP con Enter
+            document.getElementById('wip-limit').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    actualizarWIP();
+                }
+            });
+            
+            // Calcular límite flexible inicial
+            actualizarLimiteFlexible();
         });
+        
+        // Función para calcular el límite flexible (+10%)
+        function calcularLimiteFlexible(base) {
+            const flexible = Math.ceil(base * 1.10); // Redondeamos hacia arriba
+            return flexible;
+        }
+        
+        // Función para actualizar la visualización del límite flexible
+        function actualizarLimiteFlexible() {
+            const limiteBase = wipLimit;
+            const limiteFlexible = calcularLimiteFlexible(limiteBase);
+            const adicional = limiteFlexible - limiteBase;
+            
+            document.getElementById('wip-flexible').textContent = 
+                `${limiteBase} (+10% = ${limiteFlexible})`;
+            
+            // Actualizar marcadores en la barra de progreso
+            const markerBase = document.getElementById('wip-marker-base');
+            const markerFlexible = document.getElementById('wip-marker-flexible');
+            
+            // Posicionar marcadores
+            const basePercent = 100; // 100% del límite base
+            const flexiblePercent = 110; // 110% para el límite flexible
+            
+            markerBase.style.left = `${basePercent}%`;
+            markerFlexible.style.left = `${flexiblePercent}%`;
+        }
+        
+        // Función para actualizar el límite WIP
+        function actualizarWIP() {
+            const nuevoLimite = parseInt(document.getElementById('wip-limit').value);
+            
+            if (isNaN(nuevoLimite) || nuevoLimite < 1 || nuevoLimite > 20) {
+                mostrarNotificacion('El límite WIP debe ser un número entre 1 y 20', true);
+                return;
+            }
+            
+            wipLimit = nuevoLimite;
+            localStorage.setItem('wipLimit', wipLimit);
+            actualizarLimiteFlexible();
+            actualizarWIPDisplay();
+            mostrarNotificacion(`✅ Límite WIP actualizado a ${wipLimit} (+10% flexible)`);
+        }
+        
+        // Función para actualizar la visualización del WIP
+        function actualizarWIPDisplay() {
+            const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS');
+            const wipActual = tareasProgress.length;
+            const limiteFlexible = calcularLimiteFlexible(wipLimit);
+            
+            document.getElementById('wip-actual').textContent = wipActual;
+            
+            // Calcular porcentaje respecto al límite base
+            let porcentajeBase = 0;
+            if (wipLimit > 0) {
+                porcentajeBase = Math.min(100, Math.round((wipActual / wipLimit) * 100));
+            }
+            
+            // Calcular porcentaje respecto al límite flexible
+            let porcentajeFlexible = 0;
+            if (limiteFlexible > 0) {
+                porcentajeFlexible = Math.min(110, Math.round((wipActual / wipLimit) * 100));
+            }
+            
+            document.getElementById('wip-porcentaje').textContent = `${porcentajeBase}%`;
+            
+            // Actualizar barra de progreso (usamos el porcentaje base para la barra)
+            const progressFill = document.getElementById('wip-progress-fill');
+            progressFill.style.width = `${Math.min(porcentajeBase, 110)}%`;
+            
+            // Cambiar color según el estado
+            progressFill.className = 'wip-progress-fill';
+            const wipStatus = document.getElementById('wip-status');
+            
+            if (wipActual <= wipLimit) {
+                // Dentro del límite base
+                if (porcentajeBase <= 80) {
+                    progressFill.classList.add('wip-progress-ok');
+                    wipStatus.textContent = '✅ Dentro del límite base';
+                    wipStatus.className = 'wip-status wip-status-ok';
+                } else if (porcentajeBase <= 100) {
+                    progressFill.classList.add('wip-progress-warning');
+                    wipStatus.textContent = '⚠️ Cercano al límite base';
+                    wipStatus.className = 'wip-status wip-status-warning';
+                }
+            } else if (wipActual <= limiteFlexible) {
+                // Dentro del límite flexible (+10%)
+                progressFill.classList.add('wip-progress-flexible');
+                wipStatus.textContent = `⚠️ Usando límite flexible (+10%)`;
+                wipStatus.className = 'wip-status wip-status-flexible';
+                
+                // Notificación solo la primera vez que se entra en modo flexible
+                if (wipActual === wipLimit + 1) {
+                    mostrarNotificacion('⚠️ Límite base alcanzado - Usando margen flexible del 10%', true);
+                }
+            } else {
+                // Excedido el límite flexible
+                progressFill.classList.add('wip-progress-danger');
+                wipStatus.textContent = `❌ Límite flexible excedido por ${wipActual - limiteFlexible} tareas`;
+                wipStatus.className = 'wip-status wip-status-danger';
+                
+                // Mostrar advertencia si se excede el límite flexible
+                if (wipActual === limiteFlexible + 1) {
+                    mostrarNotificacion('❌ ¡Atención! Has excedido el límite flexible (+10%)', true);
+                }
+            }
+            
+            // Actualizar botones según el estado
+            actualizarBotonesWIP(wipActual, wipLimit, limiteFlexible);
+        }
+        
+        // Función para deshabilitar botones según el estado del WIP
+        function actualizarBotonesWIP(wipActual, limiteBase, limiteFlexible) {
+            const tareasTodo = tareas.filter(t => t.estado === 'TODO');
+            const tareasDone = tareas.filter(t => t.estado === 'DONE');
+            
+            // Determinar qué botones deshabilitar
+            let deshabilitarTotalmente = wipActual >= limiteFlexible; // Excedido límite flexible
+            let deshabilitarConAdvertencia = wipActual >= limiteBase && wipActual < limiteFlexible; // En modo flexible
+            
+            [...tareasTodo, ...tareasDone].forEach(tarea => {
+                const tareaElement = document.querySelector(`[data-id="${tarea.id}"]`);
+                if (tareaElement) {
+                    const btnProgress = tareaElement.querySelector('.btn-progress');
+                    if (btnProgress) {
+                        if (deshabilitarTotalmente) {
+                            btnProgress.disabled = true;
+                            btnProgress.style.opacity = '0.5';
+                            btnProgress.style.cursor = 'not-allowed';
+                            btnProgress.title = 'Límite flexible (+10%) excedido';
+                        } else if (deshabilitarConAdvertencia) {
+                            btnProgress.disabled = false;
+                            btnProgress.style.opacity = '1';
+                            btnProgress.style.cursor = 'pointer';
+                            btnProgress.title = '⚠️ Límite base alcanzado - Se permite +10% flexible';
+                        } else {
+                            btnProgress.disabled = false;
+                            btnProgress.style.opacity = '1';
+                            btnProgress.style.cursor = 'pointer';
+                            btnProgress.title = 'Mover a IN PROGRESS';
+                        }
+                    }
+                }
+            });
+        }
         
         // Función para mostrar notificación
         function mostrarNotificacion(mensaje, esError = false) {
@@ -662,6 +1042,22 @@
             const asignado = document.getElementById('asignado').value.trim();
             const estado = document.getElementById('estado').value;
             const tiempo = parseInt(document.getElementById('tiempo').value) || 60;
+            
+            // Verificar límite WIP si se está creando en IN_PROGRESS
+            if (estado === 'IN_PROGRESS') {
+                const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS').length;
+                const limiteFlexible = calcularLimiteFlexible(wipLimit);
+                
+                if (tareasProgress >= limiteFlexible) {
+                    mostrarNotificacion(`❌ Límite flexible (+10%) alcanzado (${limiteFlexible}). No puedes agregar más tareas en progreso.`, true);
+                    return;
+                } else if (tareasProgress >= wipLimit) {
+                    // Solo advertencia si estamos en el rango flexible
+                    if (!confirm(`⚠️ Límite base alcanzado (${wipLimit}). Se permite +10% flexible (hasta ${limiteFlexible}). ¿Continuar?`)) {
+                        return;
+                    }
+                }
+            }
             
             if (!titulo) {
                 mostrarNotificacion('Por favor, escribe un título para la tarea', true);
@@ -762,16 +1158,8 @@
             // Actualizar contadores
             actualizarContadores(tareasTodo.length, tareasProgress.length, tareasDone.length);
             
-            // Calcular tiempo total
-            const tiempoTotal = tareas.reduce((total, t) => total + (t.estimacion_minutos || 0), 0);
-            const horas = Math.floor(tiempoTotal / 60);
-            const minutos = tiempoTotal % 60;
-            
-            let tiempoTexto = `⏱️ Tiempo total estimado: ${tiempoTotal} minutos`;
-            if (horas > 0) {
-                tiempoTexto += ` (${horas}h ${minutos}m)`;
-            }
-            document.getElementById('tiempo-total').textContent = tiempoTexto;
+            // Actualizar WIP
+            actualizarWIPDisplay();
         }
         
         // Función para ordenar tareas según criterio
@@ -803,6 +1191,17 @@
             const total = todo + progress + done;
             document.getElementById('contador-tareas').textContent = 
                 `📊 Total: ${total} tareas | TODO: ${todo} | IN PROGRESS: ${progress} | DONE: ${done}`;
+            
+            // Calcular tiempo total
+            const tiempoTotal = tareas.reduce((total, t) => total + (t.estimacion_minutos || 0), 0);
+            const horas = Math.floor(tiempoTotal / 60);
+            const minutos = tiempoTotal % 60;
+            
+            let tiempoTexto = `⏱️ Tiempo total estimado: ${tiempoTotal} minutos`;
+            if (horas > 0) {
+                tiempoTexto += ` (${horas}h ${minutos}m)`;
+            }
+            document.getElementById('tiempo-total').textContent = tiempoTexto;
         }
         
         // Función para renderizar una columna
@@ -842,7 +1241,26 @@
                 botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TODO</button>`;
             }
             if (tarea.estado !== 'IN_PROGRESS') {
-                botones += `<button class="btn-mover btn-progress" onclick="moverTarea(${tarea.id}, 'IN_PROGRESS')">⚙️ PROGRESS</button>`;
+                // Verificar límite WIP para botón de PROGRESS
+                const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS').length;
+                const limiteFlexible = calcularLimiteFlexible(wipLimit);
+                const limiteExcedidoFlexible = tareasProgress >= limiteFlexible;
+                const enModoFlexible = tareasProgress >= wipLimit && tareasProgress < limiteFlexible;
+                
+                let atributosExtra = '';
+                let tituloBoton = 'Mover a IN PROGRESS';
+                
+                if (limiteExcedidoFlexible) {
+                    atributosExtra = 'disabled style="opacity: 0.5; cursor: not-allowed;"';
+                    tituloBoton = 'Límite flexible (+10%) alcanzado';
+                } else if (enModoFlexible) {
+                    tituloBoton = `⚠️ Límite base alcanzado - Se permite +10% (hasta ${limiteFlexible})`;
+                }
+                
+                botones += `<button class="btn-mover btn-progress" onclick="moverTarea(${tarea.id}, 'IN_PROGRESS')" 
+                    ${atributosExtra} title="${tituloBoton}">
+                    ⚙️ PROGRESS
+                </button>`;
             }
             if (tarea.estado !== 'DONE') {
                 botones += `<button class="btn-mover btn-done" onclick="moverTarea(${tarea.id}, 'DONE')">✅ DONE</button>`;
@@ -876,6 +1294,22 @@
                 if (!tarea) {
                     mostrarNotificacion('Tarea no encontrada', true);
                     return;
+                }
+                
+                // Verificar límite WIP si se mueve a IN_PROGRESS
+                if (nuevoEstado === 'IN_PROGRESS') {
+                    const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS').length;
+                    const limiteFlexible = calcularLimiteFlexible(wipLimit);
+                    
+                    if (tareasProgress >= limiteFlexible) {
+                        mostrarNotificacion(`❌ Límite flexible (+10%) alcanzado (${limiteFlexible}). No puedes mover más tareas a "En Progreso".`, true);
+                        return;
+                    } else if (tareasProgress >= wipLimit) {
+                        // Confirmación para usar el margen flexible
+                        if (!confirm(`⚠️ Límite base alcanzado (${wipLimit}). Se permite +10% flexible (hasta ${limiteFlexible}). ¿Mover esta tarea a "En Progreso"?`)) {
+                            return;
+                        }
+                    }
                 }
                 
                 const response = await fetch(`/tasks/${taskId}`, {
@@ -963,6 +1397,22 @@
             if (tiempo < 5 || tiempo > 480) {
                 mostrarNotificacion('El tiempo debe estar entre 5 y 480 minutos', true);
                 return;
+            }
+            
+            // Verificar límite WIP si se cambia a IN_PROGRESS
+            const tareaActual = tareas.find(t => t.id === taskId);
+            if (tareaActual && estado === 'IN_PROGRESS' && tareaActual.estado !== 'IN_PROGRESS') {
+                const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS').length;
+                const limiteFlexible = calcularLimiteFlexible(wipLimit);
+                
+                if (tareasProgress >= limiteFlexible) {
+                    mostrarNotificacion(`❌ Límite flexible (+10%) alcanzado (${limiteFlexible}). No puedes cambiar a "En Progreso".`, true);
+                    return;
+                } else if (tareasProgress >= wipLimit) {
+                    if (!confirm(`⚠️ Límite base alcanzado (${wipLimit}). Se permite +10% flexible (hasta ${limiteFlexible}). ¿Cambiar esta tarea a "En Progreso"?`)) {
+                        return;
+                    }
+                }
             }
             
             try {
