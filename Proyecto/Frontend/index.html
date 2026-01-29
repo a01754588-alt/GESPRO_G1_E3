@@ -567,6 +567,7 @@
         }
         
         // Función para eliminar tarea
+        // Función para eliminar tarea
         async function eliminarTarea(taskId) {
             const tarea = tareas.find(t => t.id === taskId);
             if (!tarea) return;
@@ -581,19 +582,20 @@
                 });
                 
                 if (response.ok) {
+                    const result = await response.json();
                     // Eliminar de la lista local
                     tareas = tareas.filter(t => t.id !== taskId);
                     renderizarTablero();
-                    mostrarNotificacion(`Tarea eliminada: "${tarea.titulo.substring(0, 30)}${tarea.titulo.length > 30 ? '...' : ''}"`);
+                    mostrarNotificacion(result.mensaje || `Tarea eliminada: "${tarea.titulo.substring(0, 30)}${tarea.titulo.length > 30 ? '...' : ''}"`);
                 } else {
-                    const error = await response.json();
+                    const error = await response.json().catch(() => ({ error: 'Error desconocido' }));
                     mostrarNotificacion(`Error: ${error.error}`, true);
                 }
             } catch (error) {
                 console.error('Error al eliminar tarea:', error);
                 mostrarNotificacion('Error al conectar con el servidor', true);
             }
-        }
+}
         
         // Actualizar periódicamente (cada 60 segundos)
         setInterval(cargarTareas, 60000);

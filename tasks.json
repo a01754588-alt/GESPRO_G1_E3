@@ -1,16 +1,1 @@
-[
-  {
-    "id": 4,
-    "titulo": "hacer olimpiadas",
-    "estado": "IN_PROGRESS",
-    "puntos": 0,
-    "asignado_a": null
-  },
-  {
-    "id": 5,
-    "titulo": "hacer tarea",
-    "estado": "TODO",
-    "puntos": 0,
-    "asignado_a": null
-  }
-]
+[]
