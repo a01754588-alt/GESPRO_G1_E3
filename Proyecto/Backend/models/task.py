@@ -1,13 +1,16 @@
 class Task:
-    def __init__(self, id, titulo, estado):
+    def __init__(self, id, titulo, estado="TODO", puntos=0, asignado_a=None):
         self.id = id
         self.titulo = titulo
-        self.estado = estado
+        self.estado = estado  # Ahora será: "TODO", "IN_PROGRESS", "DONE"
+        self.puntos = puntos
+        self.asignado_a = asignado_a
 
     def to_dict(self):
-        # Método para convertir a diccionario y poder devolverlo como JSON
         return {
             "id": self.id,
             "titulo": self.titulo,
-            "estado": self.estado
+            "estado": self.estado,
+            "puntos": self.puntos,
+            "asignado_a": self.asignado_a
         }

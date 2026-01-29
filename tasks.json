@@ -1,27 +1,16 @@
 [
   {
-    "id": 1,
-    "titulo": "Aprender Flask",
-    "estado": false
-  },
-  {
-    "id": 2,
-    "titulo": "Crear API REST",
-    "estado": false
-  },
-  {
-    "id": 3,
-    "titulo": "Conectar frontend",
-    "estado": true
-  },
-  {
     "id": 4,
     "titulo": "hacer olimpiadas",
-    "estado": false
+    "estado": "IN_PROGRESS",
+    "puntos": 0,
+    "asignado_a": null
   },
   {
     "id": 5,
     "titulo": "hacer tarea",
-    "estado": false
+    "estado": "TODO",
+    "puntos": 0,
+    "asignado_a": null
   }
 ]

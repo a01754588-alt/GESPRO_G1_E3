@@ -3,41 +3,398 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="styles/main.css"> <!-- Tu CSS -->
     <title>Gestor de Tareas</title>
-   
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* Formulario */
+        .form-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-title {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #4CAF50;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input, select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+
+        .btn-crear {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-crear:hover {
+            background: #45a049;
+        }
+
+        /* Tablero */
+        .tablero {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .columna {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            min-height: 400px;
+        }
+
+        .columna-header {
+            padding: 12px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .todo .columna-header { background: #f44336; }
+        .progress .columna-header { background: #ff9800; }
+        .done .columna-header { background: #4CAF50; }
+
+        .tarea-card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid;
+            transition: transform 0.2s;
+        }
+
+        .tarea-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .todo .tarea-card { border-left-color: #f44336; }
+        .progress .tarea-card { border-left-color: #ff9800; }
+        .done .tarea-card { border-left-color: #4CAF50; }
+
+        .tarea-titulo {
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .tarea-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .puntos-badge {
+            background: #333;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+
+        .asignado {
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .tarea-acciones {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        .btn-mover {
+            flex: 1;
+            padding: 6px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-mover:hover {
+            opacity: 0.9;
+        }
+
+        .btn-todo { background: #f44336; }
+        .btn-progress { background: #ff9800; }
+        .btn-done { background: #4CAF50; }
+
+        .btn-eliminar {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-left: 5px;
+            transition: background 0.2s;
+        }
+
+        .btn-eliminar:hover {
+            background: #c82333;
+        }
+
+        .mensaje-vacio {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tablero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notificación */
+        .notificacion {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notificacion.error {
+            background: #f44336;
+        }
+
+        .contador-tareas {
+            text-align: center;
+            margin-top: 10px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
+    <!-- Notificación flotante -->
+    <div id="notificacion" class="notificacion"></div>
+
     <div class="container">
-        <h1>Gestor de Tareas</h1>
-        
-        <div class="formulario">
-            <h3>Nueva Tarea</h3>
-            <form id="form-tarea">
-                <input type="text" id="titulo-tarea" placeholder="Título de la tarea" required>
-                <button type="submit">Crear</button>
-            </form>
+        <header>
+            <h1>📋 Gestor de Tareas</h1>
+        </header>
+
+        <!-- Formulario -->
+        <div class="form-card">
+            <div class="form-title">➕ Nueva Tarea</div>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="titulo">Título de la tarea *</label>
+                    <input type="text" id="titulo" placeholder="Ej: Revisar documentación" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="puntos">Puntos (1-10)</label>
+                    <input type="number" id="puntos" min="1" max="10" value="1">
+                </div>
+                
+                <div class="form-group">
+                    <label for="asignado">Asignado a (opcional)</label>
+                    <input type="text" id="asignado" placeholder="Ej: Juan">
+                </div>
+                
+                <div class="form-group">
+                    <label for="estado">Estado inicial</label>
+                    <select id="estado">
+                        <option value="TODO">TO DO</option>
+                        <option value="IN_PROGRESS">IN PROGRESS</option>
+                        <option value="DONE">DONE</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button class="btn-crear" onclick="crearTarea()">
+                ➕ Crear Tarea
+            </button>
         </div>
-        
-        <h2>Lista de Tareas</h2>
-        <ul id="lista-tareas" class="lista-tareas">
-            <!-- Las tareas se cargarán aquí -->
-        </ul>
+
+        <!-- Contador de tareas -->
+        <div class="contador-tareas" id="contador-tareas">
+            Total: 0 tareas | TO DO: 0 | IN PROGRESS: 0 | DONE: 0
+        </div>
+
+        <!-- Tablero Kanban -->
+        <div class="tablero">
+            <!-- Columna TODO -->
+            <div class="columna todo">
+                <div class="columna-header">📝 TO DO</div>
+                <div id="lista-todo" class="tareas-columna">
+                    <!-- Tareas TODO se cargarán aquí -->
+                </div>
+            </div>
+
+            <!-- Columna IN PROGRESS -->
+            <div class="columna progress">
+                <div class="columna-header">⚙️ IN PROGRESS</div>
+                <div id="lista-progress" class="tareas-columna">
+                    <!-- Tareas IN PROGRESS se cargarán aquí -->
+                </div>
+            </div>
+
+            <!-- Columna DONE -->
+            <div class="columna done">
+                <div class="columna-header">✅ DONE</div>
+                <div id="lista-done" class="tareas-columna">
+                    <!-- Tareas DONE se cargarán aquí -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Cargar tareas al iniciar
-        document.addEventListener('DOMContentLoaded', cargarTareas);
+        // Estado global
+        let tareas = [];
         
-        // Manejar el formulario
-        document.getElementById('form-tarea').addEventListener('submit', async function(e) {
-            e.preventDefault();
+        // Cargar tareas al iniciar
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTareas();
+            // Permitir enviar formulario con Enter
+            document.getElementById('titulo').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    crearTarea();
+                }
+            });
+        });
+        
+        // Función para mostrar notificación
+        function mostrarNotificacion(mensaje, esError = false) {
+            const notificacion = document.getElementById('notificacion');
+            notificacion.textContent = mensaje;
+            notificacion.className = 'notificacion';
             
-            const tituloInput = document.getElementById('titulo-tarea');
-            const titulo = tituloInput.value.trim();
+            if (esError) {
+                notificacion.classList.add('error');
+            }
+            
+            notificacion.style.display = 'block';
+            
+            // Ocultar después de 3 segundos
+            setTimeout(() => {
+                notificacion.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Función para crear nueva tarea
+        async function crearTarea() {
+            const titulo = document.getElementById('titulo').value.trim();
+            const puntos = parseInt(document.getElementById('puntos').value) || 1;
+            const asignado = document.getElementById('asignado').value.trim();
+            const estado = document.getElementById('estado').value;
             
             if (!titulo) {
-                alert('Por favor, escribe un título');
+                mostrarNotificacion('Por favor, escribe un título para la tarea', true);
+                document.getElementById('titulo').focus();
+                return;
+            }
+            
+            if (puntos < 1 || puntos > 10) {
+                mostrarNotificacion('Los puntos deben estar entre 1 y 10', true);
                 return;
             }
             
@@ -47,75 +404,202 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ titulo: titulo })
+                    body: JSON.stringify({
+                        titulo: titulo,
+                        puntos: puntos,
+                        asignado_a: asignado || null,
+                        estado: estado
+                    })
                 });
                 
                 if (response.ok) {
-                    // Recargar la lista de tareas
-                    cargarTareas();
-                    // Limpiar el input
-                    tituloInput.value = '';
+                    const nuevaTarea = await response.json();
+                    tareas.push(nuevaTarea);
+                    renderizarTablero();
+                    mostrarNotificacion(`Tarea "${titulo.substring(0, 30)}${titulo.length > 30 ? '...' : ''}" creada`);
+                    
+                    // Limpiar formulario (solo título)
+                    document.getElementById('titulo').value = '';
+                    document.getElementById('titulo').focus();
                 } else {
                     const error = await response.json();
-                    alert('Error: ' + error.error);
+                    mostrarNotificacion(`Error: ${error.error}`, true);
                 }
             } catch (error) {
-                console.error('Error:', error);
-                alert('Error al conectar con el servidor');
+                console.error('Error al crear tarea:', error);
+                mostrarNotificacion('Error al conectar con el servidor', true);
             }
-        });
+        }
         
-        // Función para cargar y mostrar tareas
+        // Función para cargar tareas
         async function cargarTareas() {
             try {
                 const response = await fetch('/tasks');
-                const tareas = await response.json();
-                
-                const lista = document.getElementById('lista-tareas');
-                lista.innerHTML = '';
-                
-                if (tareas.length === 0) {
-                    lista.innerHTML = '<p>No hay tareas. ¡Crea una!</p>';
+                if (!response.ok) throw new Error('Error en la respuesta');
+                tareas = await response.json();
+                renderizarTablero();
+            } catch (error) {
+                console.error('Error al cargar tareas:', error);
+                // Datos de ejemplo si falla
+                tareas = [
+                    { id: 1, titulo: "Crear backend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Núvo" },
+                    { id: 2, titulo: "Crear frontend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Daniel" },
+                    { id: 3, titulo: "Conectar frontend con backend", estado: "IN_PROGRESS", puntos: 3, asignado_a: null },
+                    { id: 4, titulo: "Probar la aplicación completa", estado: "DONE", puntos: 1, asignado_a: "Equipo" }
+                ];
+                renderizarTablero();
+                mostrarNotificacion('Usando datos de ejemplo - Servidor no disponible', true);
+            }
+        }
+        
+        // Función para renderizar el tablero
+        function renderizarTablero() {
+            // Limpiar columnas
+            document.getElementById('lista-todo').innerHTML = '';
+            document.getElementById('lista-progress').innerHTML = '';
+            document.getElementById('lista-done').innerHTML = '';
+            
+            // Separar tareas por estado
+            const tareasTodo = tareas.filter(t => t.estado === 'TODO');
+            const tareasProgress = tareas.filter(t => t.estado === 'IN_PROGRESS');
+            const tareasDone = tareas.filter(t => t.estado === 'DONE');
+            
+            // Renderizar cada columna
+            renderizarColumna('lista-todo', tareasTodo);
+            renderizarColumna('lista-progress', tareasProgress);
+            renderizarColumna('lista-done', tareasDone);
+            
+            // Actualizar contador
+            actualizarContador(tareasTodo.length, tareasProgress.length, tareasDone.length);
+        }
+        
+        // Función para actualizar el contador
+        function actualizarContador(todo, progress, done) {
+            const total = todo + progress + done;
+            document.getElementById('contador-tareas').textContent = 
+                `Total: ${total} tareas | TODO: ${todo} | IN PROGRESS: ${progress} | DONE: ${done}`;
+        }
+        
+        // Función para renderizar una columna
+        function renderizarColumna(columnaId, tareasColumna) {
+            const columna = document.getElementById(columnaId);
+            
+            if (tareasColumna.length === 0) {
+                columna.innerHTML = '<div class="mensaje-vacio">No hay tareas aquí</div>';
+                return;
+            }
+            
+            tareasColumna.forEach(tarea => {
+                const tareaElement = crearElementoTarea(tarea);
+                columna.appendChild(tareaElement);
+            });
+        }
+        
+        // Función para crear el elemento de una tarea
+        function crearElementoTarea(tarea) {
+            const div = document.createElement('div');
+            div.className = 'tarea-card';
+            div.dataset.id = tarea.id;
+            
+            // Crear botones según el estado actual
+            let botones = '';
+            
+            // Solo mostrar botones para mover a estados diferentes
+            if (tarea.estado !== 'TODO') {
+                botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TODO</button>`;
+            }
+            if (tarea.estado !== 'IN_PROGRESS') {
+                botones += `<button class="btn-mover btn-progress" onclick="moverTarea(${tarea.id}, 'IN_PROGRESS')">⚙️ PROGRESS</button>`;
+            }
+            if (tarea.estado !== 'DONE') {
+                botones += `<button class="btn-mover btn-done" onclick="moverTarea(${tarea.id}, 'DONE')">✅ DONE</button>`;
+            }
+            
+            // Botón para eliminar
+            botones += `<button class="btn-eliminar" onclick="eliminarTarea(${tarea.id})" title="Eliminar tarea">🗑️</button>`;
+            
+            div.innerHTML = `
+                <div class="tarea-titulo">${tarea.titulo}</div>
+                <div class="tarea-info">
+                    <span class="puntos-badge">${tarea.puntos} ${tarea.puntos === 1 ? 'punto' : 'puntos'}</span>
+                    ${tarea.asignado_a ? `<span class="asignado">👤 ${tarea.asignado_a}</span>` : ''}
+                </div>
+                <div class="tarea-acciones">
+                    ${botones}
+                </div>
+            `;
+            
+            return div;
+        }
+        
+        // Función para mover una tarea entre columnas
+        async function moverTarea(taskId, nuevoEstado) {
+            try {
+                const tarea = tareas.find(t => t.id === taskId);
+                if (!tarea) {
+                    mostrarNotificacion('Tarea no encontrada', true);
                     return;
                 }
                 
-                tareas.forEach(tarea => {
-                    const li = document.createElement('li');
-                    li.className = 'tarea-item';
-                    
-                    // Marcar como completada si estado es true
-                    if (tarea.estado) {
-                        li.classList.add('completada');
-                    }
-                    
-                    // Determinar texto del estado
-                    const estadoTexto = tarea.estado ? 'COMPLETADA' : 'PENDIENTE';
-                    const estadoClase = tarea.estado ? 'completada' : 'pendiente';
-                    
-                    li.innerHTML = `
-                        <div>
-                            <strong>${tarea.titulo}</strong>
-                            <span class="estado ${estadoClase}">${estadoTexto}</span>
-                        </div>
-                        <small>ID: ${tarea.id}</small>
-                    `;
-                    
-                    lista.appendChild(li);
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        estado: nuevoEstado
+                    })
                 });
                 
+                if (response.ok) {
+                    // Actualizar la tarea localmente
+                    tarea.estado = nuevoEstado;
+                    renderizarTablero();
+                    mostrarNotificacion(`Tarea movida a ${nuevoEstado}`);
+                } else {
+                    const error = await response.json();
+                    mostrarNotificacion(`Error: ${error.error}`, true);
+                }
             } catch (error) {
-                console.error('Error al cargar tareas:', error);
-                document.getElementById('lista-tareas').innerHTML = 
-                    '<p>Error al cargar las tareas. Verifica que el servidor esté ejecutándose.</p>';
+                console.error('Error al mover tarea:', error);
+                mostrarNotificacion('Error al conectar con el servidor', true);
             }
         }
+        
+        // Función para eliminar tarea
+        async function eliminarTarea(taskId) {
+            const tarea = tareas.find(t => t.id === taskId);
+            if (!tarea) return;
+            
+            if (!confirm(`¿Estás seguro de que quieres eliminar la tarea:\n"${tarea.titulo}"?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/tasks/${taskId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    // Eliminar de la lista local
+                    tareas = tareas.filter(t => t.id !== taskId);
+                    renderizarTablero();
+                    mostrarNotificacion(`Tarea eliminada: "${tarea.titulo.substring(0, 30)}${tarea.titulo.length > 30 ? '...' : ''}"`);
+                } else {
+                    const error = await response.json();
+                    mostrarNotificacion(`Error: ${error.error}`, true);
+                }
+            } catch (error) {
+                console.error('Error al eliminar tarea:', error);
+                mostrarNotificacion('Error al conectar con el servidor', true);
+            }
+        }
+        
+        // Actualizar periódicamente (cada 60 segundos)
+        setInterval(cargarTareas, 60000);
+        
+        // También actualizar cuando la ventana gana foco
+        window.addEventListener('focus', cargarTareas);
     </script>
 </body>
 </html>
-
-
-
-
-<meta charset="UTF-8">
-    <title>Lista de Tareas</title>
-    <link rel="stylesheet" href="styles/main.css"> <!-- Tu CSS -->
