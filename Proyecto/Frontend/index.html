@@ -442,7 +442,7 @@
                 console.error('Error al cargar tareas:', error);
                 // Datos de ejemplo si falla
                 tareas = [
-                    { id: 1, titulo: "Crear backend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Núvo" },
+                    { id: 1, titulo: "Crear backend mínimo operativo", estado: "TO }DO", puntos: 2, asignado_a: "Núvo" },
                     { id: 2, titulo: "Crear frontend mínimo operativo", estado: "TODO", puntos: 2, asignado_a: "Daniel" },
                     { id: 3, titulo: "Conectar frontend con backend", estado: "IN_PROGRESS", puntos: 3, asignado_a: null },
                     { id: 4, titulo: "Probar la aplicación completa", estado: "DONE", puntos: 1, asignado_a: "Equipo" }
@@ -506,7 +506,7 @@
             
             // Solo mostrar botones para mover a estados diferentes
             if (tarea.estado !== 'TODO') {
-                botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TODO</button>`;
+                botones += `<button class="btn-mover btn-todo" onclick="moverTarea(${tarea.id}, 'TODO')">📝 TO DO</button>`;
             }
             if (tarea.estado !== 'IN_PROGRESS') {
                 botones += `<button class="btn-mover btn-progress" onclick="moverTarea(${tarea.id}, 'IN_PROGRESS')">⚙️ PROGRESS</button>`;

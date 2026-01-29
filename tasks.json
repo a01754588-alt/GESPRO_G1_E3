@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": 7,
+    "titulo": "Creacion de frontend",
+    "estado": "TODO",
+    "puntos": 1,
+    "asignado_a": "Julian"
+  },
+  {
+    "id": 8,
+    "titulo": "Creacion de Backend",
+    "estado": "DONE",
+    "puntos": 1,
+    "asignado_a": "Diego"
+  },
+  {
+    "id": 9,
+    "titulo": "Creacion de Base de Datos",
+    "estado": "IN_PROGRESS",
+    "puntos": 1,
+    "asignado_a": "Marco"
+  },
+  {
+    "id": 10,
+    "titulo": "Documentacion y pruebas",
+    "estado": "TODO",
+    "puntos": 1,
+    "asignado_a": "Daniela"
+  }
+]
