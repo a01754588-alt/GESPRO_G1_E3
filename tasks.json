@@ -2,29 +2,33 @@
   {
     "id": 7,
     "titulo": "Creacion de frontend",
-    "estado": "TODO",
+    "estado": "IN_PROGRESS",
     "puntos": 1,
-    "asignado_a": "Julian"
+    "asignado_a": "Rodrigo",
+    "estimacion_minutos": 45
   },
   {
     "id": 8,
     "titulo": "Creacion de Backend",
-    "estado": "DONE",
+    "estado": "TODO",
     "puntos": 1,
-    "asignado_a": "Diego"
+    "asignado_a": "Diego",
+    "estimacion_minutos": 60
   },
   {
     "id": 9,
     "titulo": "Creacion de Base de Datos",
-    "estado": "IN_PROGRESS",
+    "estado": "DONE",
     "puntos": 1,
-    "asignado_a": "Marco"
+    "asignado_a": "Marco",
+    "estimacion_minutos": 60
   },
   {
     "id": 10,
     "titulo": "Documentacion y pruebas",
-    "estado": "TODO",
-    "puntos": 1,
-    "asignado_a": "Daniela"
+    "estado": "DONE",
+    "puntos": 2,
+    "asignado_a": "Daniela",
+    "estimacion_minutos": 120
   }
 ]
