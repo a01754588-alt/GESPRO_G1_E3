@@ -2,41 +2,120 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Lista de Tareas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="styles/main.css"> <!-- Tu CSS -->
+    <title>Gestor de Tareas</title>
+   
 </head>
 <body>
-    <h1>Mis Tareas</h1>
-    <ul id="task-list">
-        <!-- Aquí se insertarán las tareas desde JS -->
-    </ul>
+    <div class="container">
+        <h1>Gestor de Tareas</h1>
+        
+        <div class="formulario">
+            <h3>Nueva Tarea</h3>
+            <form id="form-tarea">
+                <input type="text" id="titulo-tarea" placeholder="Título de la tarea" required>
+                <button type="submit">Crear</button>
+            </form>
+        </div>
+        
+        <h2>Lista de Tareas</h2>
+        <ul id="lista-tareas" class="lista-tareas">
+            <!-- Las tareas se cargarán aquí -->
+        </ul>
+    </div>
 
     <script>
-        // Función para cargar tareas desde el backend
+        // Cargar tareas al iniciar
+        document.addEventListener('DOMContentLoaded', cargarTareas);
+        
+        // Manejar el formulario
+        document.getElementById('form-tarea').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const tituloInput = document.getElementById('titulo-tarea');
+            const titulo = tituloInput.value.trim();
+            
+            if (!titulo) {
+                alert('Por favor, escribe un título');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ titulo: titulo })
+                });
+                
+                if (response.ok) {
+                    // Recargar la lista de tareas
+                    cargarTareas();
+                    // Limpiar el input
+                    tituloInput.value = '';
+                } else {
+                    const error = await response.json();
+                    alert('Error: ' + error.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al conectar con el servidor');
+            }
+        });
+        
+        // Función para cargar y mostrar tareas
         async function cargarTareas() {
             try {
-                const response = await fetch("/tasks");
+                const response = await fetch('/tasks');
                 const tareas = await response.json();
-                const taskList = document.getElementById("task-list");
-
+                
+                const lista = document.getElementById('lista-tareas');
+                lista.innerHTML = '';
+                
+                if (tareas.length === 0) {
+                    lista.innerHTML = '<p>No hay tareas. ¡Crea una!</p>';
+                    return;
+                }
+                
                 tareas.forEach(tarea => {
-                    const li = document.createElement("li");
-                    li.textContent = `${tarea.titulo} - ${tarea.estado}`;
+                    const li = document.createElement('li');
+                    li.className = 'tarea-item';
                     
-                    // Clase para tareas completadas (para tu CSS)
-                    if (tarea.estado === "completada") {
-                        li.classList.add("completada");
+                    // Marcar como completada si estado es true
+                    if (tarea.estado) {
+                        li.classList.add('completada');
                     }
-
-                    taskList.appendChild(li);
+                    
+                    // Determinar texto del estado
+                    const estadoTexto = tarea.estado ? 'COMPLETADA' : 'PENDIENTE';
+                    const estadoClase = tarea.estado ? 'completada' : 'pendiente';
+                    
+                    li.innerHTML = `
+                        <div>
+                            <strong>${tarea.titulo}</strong>
+                            <span class="estado ${estadoClase}">${estadoTexto}</span>
+                        </div>
+                        <small>ID: ${tarea.id}</small>
+                    `;
+                    
+                    lista.appendChild(li);
                 });
+                
             } catch (error) {
-                console.error("Error al cargar tareas:", error);
+                console.error('Error al cargar tareas:', error);
+                document.getElementById('lista-tareas').innerHTML = 
+                    '<p>Error al cargar las tareas. Verifica que el servidor esté ejecutándose.</p>';
             }
         }
-
-        // Llamamos a la función al cargar la página
-        cargarTareas();
     </script>
 </body>
 </html>
+
+
+
+
+<meta charset="UTF-8">
+    <title>Lista de Tareas</title>
+    <link rel="stylesheet" href="styles/main.css"> <!-- Tu CSS -->

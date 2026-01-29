@@ -1,0 +1,27 @@
+[
+  {
+    "id": 1,
+    "titulo": "Aprender Flask",
+    "estado": false
+  },
+  {
+    "id": 2,
+    "titulo": "Crear API REST",
+    "estado": false
+  },
+  {
+    "id": 3,
+    "titulo": "Conectar frontend",
+    "estado": true
+  },
+  {
+    "id": 4,
+    "titulo": "hacer olimpiadas",
+    "estado": false
+  },
+  {
+    "id": 5,
+    "titulo": "hacer tarea",
+    "estado": false
+  }
+]
