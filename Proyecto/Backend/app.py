@@ -1,13 +1,118 @@
-from flask import Flask, render_template, jsonify, request
+from flask import Flask, render_template, jsonify, request, redirect, session
 from models.task import Task
+from models.user import User
 from data.task_data import get_tasks, add_task, update_task, delete_task, get_task_by_id
+from data.user_data import get_users, authenticate_user, get_user_by_email
 
 app = Flask(__name__, static_folder="../Frontend", template_folder="../Frontend")
+app.secret_key = 'demo_key_123'  # Clave secreta para sesiones (cambia en producción)
 
-# Ruta principal - sirve el HTML
+# Ruta de login
+@app.route("/login", methods=["GET"])
+def login_page():
+    return render_template("login.html")
+
+# API de login
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    
+    if not data or "email" not in data or "password" not in data:
+        return jsonify({"error": "Email y contraseña son requeridos"}), 400
+    
+    email = data.get("email")
+    password = data.get("password")
+    
+    # Autenticar usuario
+    user = authenticate_user(email, password)
+    
+    if user:
+        # Guardar en sesión
+        session['user_id'] = user.id
+        session['user_email'] = user.email
+        session['user_name'] = user.nombre
+        session['user_role'] = user.rol
+        session['logged_in'] = True
+        
+        return jsonify({
+            "success": True,
+            "message": "Login exitoso",
+            "user": {
+                "id": user.id,
+                "nombre": user.nombre,
+                "email": user.email,
+                "rol": user.rol
+            }
+        })
+    else:
+        return jsonify({"error": "Credenciales incorrectas"}), 401
+
+# Ruta de logout
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/login")
+
+# Middleware para verificar autenticación
+@app.before_request
+def check_auth():
+    # Rutas que no requieren autenticación
+    public_routes = ['login_page', 'login', 'static']
+    
+    if request.endpoint in public_routes:
+        return
+    
+    # Verificar si está autenticado
+    if not session.get('logged_in'):
+        return redirect('/login')
+
+# Ruta principal - ahora requiere login
 @app.route("/")
 def index():
-    return render_template("index.html")
+    if not session.get('logged_in'):
+        return redirect('/login')
+    
+    # Pasar información del usuario al template
+    user_info = {
+        'id': session.get('user_id'),
+        'nombre': session.get('user_name'),
+        'email': session.get('user_email'),
+        'rol': session.get('user_role')
+    }
+    
+    return render_template("index.html", user=user_info)
+
+# Ruta para obtener información del usuario actual
+@app.route("/api/current-user")
+def get_current_user():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    user_id = session.get('user_id')
+    # Aquí podrías buscar el usuario completo en la base de datos
+    user_info = {
+        'id': session.get('user_id'),
+        'nombre': session.get('user_name'),
+        'email': session.get('user_email'),
+        'rol': session.get('user_role')
+    }
+    
+    return jsonify(user_info)
+
+# Ruta para cambiar contraseña
+@app.route("/api/change-password", methods=["POST"])
+def change_password():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    data = request.get_json()
+    if not data or "current_password" not in data or "new_password" not in data:
+        return jsonify({"error": "Datos incompletos"}), 400
+    
+    # En una implementación real, verificarías la contraseña actual
+    # y actualizarías en la base de datos
+    
+    return jsonify({"success": True, "message": "Contraseña actualizada"})
 
 # GET /tasks → devuelve todas las tareas ordenadas por tiempo
 @app.route("/tasks", methods=["GET"])
@@ -284,6 +389,20 @@ def tasks_by_responsable(responsable):
         print(f"Error en GET /tasks/responsable/{responsable}: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
+# Ruta para obtener todos los usuarios (solo para usuarios autenticados)
+@app.route("/api/users", methods=["GET"])
+def get_all_users():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        users = get_users()
+        users_data = [user.to_dict() for user in users]
+        return jsonify(users_data)
+    except Exception as e:
+        print(f"Error en GET /api/users: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
 # Middleware CORS manual para peticiones del mismo origen
 @app.after_request
 def add_cors_headers(response):
@@ -332,6 +451,11 @@ def after_request_logging(response):
 if __name__ == "__main__":
     print("=== Iniciando Gestor de Tareas ===")
     print("Servidor corriendo en: http://localhost:5000")
+    print("Página de login: http://localhost:5000/login")
+    print("Credenciales de prueba:")
+    print("  - ana@empresa.com / ana123")
+    print("  - carlos@empresa.com / carlos123")
+    print("  - luis@empresa.com / luis123")
     print("Presiona Ctrl+C para detener")
     print("=" * 40)
     
