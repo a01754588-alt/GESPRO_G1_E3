@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Directorios específicos de caché
+Backend/__pycache__/
+Backend/data/__pycache__/
+Backend/models/__pycache__/
+
+# Archivo de datos de la aplicación
+tasks.json
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+
+# Entornos virtuales
+venv/
+env/
+.venv/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
