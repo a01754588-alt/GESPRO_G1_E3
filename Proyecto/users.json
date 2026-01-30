@@ -67,7 +67,7 @@
     "nombre": "David Torres",
     "email": "david@empresa.com",
     "rol": "Invitado",
-    "password": "david123",
+    "password": "123",
     "activo": true,
     "tareas_asignadas": []
   }
