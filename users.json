@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "nombre": "Ana Garc\u00eda",
+    "email": "ana@empresa.com",
+    "rol": "Product Owner (PO)",
+    "password": "ana123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 2,
+    "nombre": "Carlos Rodr\u00edguez",
+    "email": "carlos@empresa.com",
+    "rol": "Agile Leader / Scrum Master",
+    "password": "carlos123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 4,
+    "nombre": "Mar\u00eda L\u00f3pez",
+    "email": "maria@empresa.com",
+    "rol": "Desarrollador Frontend",
+    "password": "maria123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 5,
+    "nombre": "Pedro Mart\u00ednez",
+    "email": "pedro@empresa.com",
+    "rol": "Desarrollador Full Stack",
+    "password": "pedro123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 6,
+    "nombre": "Laura S\u00e1nchez",
+    "email": "laura@empresa.com",
+    "rol": "Dise\u00f1ador UX/UI",
+    "password": "laura123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 7,
+    "nombre": "Jorge Ram\u00edrez",
+    "email": "jorge@empresa.com",
+    "rol": "QA / Tester",
+    "password": "jorge123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 8,
+    "nombre": "Sof\u00eda Castro",
+    "email": "sofia@empresa.com",
+    "rol": "DevOps Engineer",
+    "password": "sofia123",
+    "activo": true,
+    "tareas_asignadas": []
+  },
+  {
+    "id": 9,
+    "nombre": "David Torres",
+    "email": "david@empresa.com",
+    "rol": "Invitado",
+    "password": "david123",
+    "activo": true,
+    "tareas_asignadas": []
+  }
+]

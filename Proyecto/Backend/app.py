@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, redirect, session
 from models.task import Task
 from models.user import User
 from data.task_data import get_tasks, add_task, update_task, delete_task, get_task_by_id
-from data.user_data import get_users, authenticate_user, get_user_by_email
+from data.user_data import get_users, authenticate_user, get_user_by_email, get_user_by_id, add_user, update_user, delete_user, get_roles
 
 app = Flask(__name__, static_folder="../Frontend", template_folder="../Frontend")
 app.secret_key = 'demo_key_123'  # Clave secreta para sesiones (cambia en producción)
@@ -389,9 +389,21 @@ def tasks_by_responsable(responsable):
         print(f"Error en GET /tasks/responsable/{responsable}: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
-# Ruta para obtener todos los usuarios (solo para usuarios autenticados)
-@app.route("/api/users", methods=["GET"])
-def get_all_users():
+# Ruta para la página de gestión de usuarios
+@app.route("/usuarios")
+def usuarios_page():
+    if not session.get('logged_in'):
+        return redirect('/login')
+    
+    # Verificar si el usuario tiene permisos de admin
+    user_role = session.get('user_role', '')
+    is_admin = user_role in ['Product Owner (PO)', 'Agile Leader / Scrum Master']
+    
+    return render_template("usuarios.html", user_role=user_role, is_admin=is_admin)
+
+# API para obtener todos los usuarios
+@app.route("/api/usuarios", methods=["GET"])
+def get_all_usuarios():
     if not session.get('logged_in'):
         return jsonify({"error": "No autenticado"}), 401
     
@@ -400,7 +412,181 @@ def get_all_users():
         users_data = [user.to_dict() for user in users]
         return jsonify(users_data)
     except Exception as e:
-        print(f"Error en GET /api/users: {e}")
+        print(f"Error en GET /api/usuarios: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# API para obtener roles disponibles
+@app.route("/api/roles", methods=["GET"])
+def get_all_roles():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        roles = get_roles()
+        return jsonify(roles)
+    except Exception as e:
+        print(f"Error en GET /api/roles: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# API para crear nuevo usuario
+@app.route("/api/usuarios", methods=["POST"])
+def create_usuario():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        data = request.get_json()
+        
+        # Validar datos requeridos
+        if not data or "nombre" not in data or "email" not in data or "rol" not in data:
+            return jsonify({"error": "Nombre, email y rol son requeridos"}), 400
+        
+        nombre = data.get("nombre", "").strip()
+        email = data.get("email", "").strip()
+        rol = data.get("rol", "").strip()
+        password = data.get("password", "123456")  # Contraseña por defecto
+        
+        if not nombre or not email or not rol:
+            return jsonify({"error": "Nombre, email y rol no pueden estar vacíos"}), 400
+        
+        # Crear nuevo usuario
+        nuevo_usuario = add_user(
+            nombre=nombre,
+            email=email,
+            rol=rol,
+            password=password
+        )
+        
+        return jsonify(nuevo_usuario.to_dict()), 201
+        
+    except Exception as e:
+        print(f"Error en POST /api/usuarios: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# API para actualizar usuario
+@app.route("/api/usuarios/<int:user_id>", methods=["PUT"])
+def update_usuario(user_id):
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        data = request.get_json()
+        
+        if not data:
+            return jsonify({"error": "No se enviaron datos para actualizar"}), 400
+        
+        # Verificar que el usuario existe
+        user = get_user_by_id(user_id)
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        # Preparar datos para actualización
+        update_data = {}
+        
+        # Validar y procesar cada campo
+        if 'nombre' in data:
+            nombre = data.get("nombre", "").strip()
+            if nombre:
+                update_data['nombre'] = nombre
+            else:
+                return jsonify({"error": "El nombre no puede estar vacío"}), 400
+        
+        if 'email' in data:
+            email = data.get("email", "").strip()
+            if email:
+                update_data['email'] = email
+            else:
+                return jsonify({"error": "El email no puede estar vacío"}), 400
+        
+        if 'rol' in data:
+            rol = data.get("rol", "").strip()
+            if rol:
+                update_data['rol'] = rol
+            else:
+                return jsonify({"error": "El rol no puede estar vacío"}), 400
+        
+        if 'password' in data:
+            password = data.get("password", "").strip()
+            if password:
+                update_data['password'] = password
+        
+        if 'activo' in data:
+            update_data['activo'] = bool(data.get("activo"))
+        
+        # Si no hay datos válidos para actualizar
+        if not update_data:
+            return jsonify({"error": "No se proporcionaron datos válidos para actualizar"}), 400
+        
+        # Actualizar el usuario
+        usuario_actualizado = update_user(user_id, update_data)
+        
+        if usuario_actualizado:
+            return jsonify(usuario_actualizado.to_dict())
+        else:
+            return jsonify({"error": "Error al actualizar el usuario"}), 500
+            
+    except Exception as e:
+        print(f"Error en PUT /api/usuarios/{user_id}: {e}")
+        return jsonify({"error": str(e)}), 500
+
+# API para eliminar usuario
+@app.route("/api/usuarios/<int:user_id>", methods=["DELETE"])
+def delete_usuario(user_id):
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        # Verificar que el usuario existe
+        user = get_user_by_id(user_id)
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        # Evitar que se elimine a sí mismo
+        current_user_id = session.get('user_id')
+        if user_id == current_user_id:
+            return jsonify({"error": "No puedes eliminarte a ti mismo"}), 400
+        
+        # Evitar que se eliminen usuarios admin importantes
+        if user.email in ['ana@empresa.com', 'carlos@empresa.com']:
+            return jsonify({"error": "No se pueden eliminar usuarios administradores principales"}), 400
+        
+        # Eliminar el usuario
+        eliminado = delete_user(user_id)
+        
+        if eliminado:
+            return jsonify({
+                "mensaje": f"Usuario '{user.nombre}' eliminado correctamente",
+                "id": user_id
+            })
+        else:
+            return jsonify({"error": "Error al eliminar el usuario"}), 500
+            
+    except Exception as e:
+        print(f"Error en DELETE /api/usuarios/{user_id}: {e}")
+        return jsonify({"error": "Error interno del servidor"}), 500
+
+# API para obtener usuarios para asignar en tareas
+@app.route("/api/usuarios/asignables", methods=["GET"])
+def get_usuarios_asignables():
+    if not session.get('logged_in'):
+        return jsonify({"error": "No autenticado"}), 401
+    
+    try:
+        users = get_users()
+        # Filtrar usuarios activos
+        usuarios_asignables = []
+        for user in users:
+            if user.activo:
+                usuarios_asignables.append({
+                    'id': user.id,
+                    'nombre': user.nombre,
+                    'email': user.email,
+                    'rol': user.rol
+                })
+        
+        return jsonify(usuarios_asignables)
+    except Exception as e:
+        print(f"Error en GET /api/usuarios/asignables: {e}")
         return jsonify({"error": "Error interno del servidor"}), 500
 
 # Middleware CORS manual para peticiones del mismo origen

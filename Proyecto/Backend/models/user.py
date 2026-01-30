@@ -1,5 +1,5 @@
 class User:
-    def __init__(self, id, nombre, email, rol, password="123456", disponibilidad=100, activo=True):
+    def __init__(self, id, nombre, email, rol, password="123456", activo=True):
         """
         Clase para representar un usuario del equipo
         
@@ -9,7 +9,6 @@ class User:
             email (str): Correo electrónico (será el username)
             rol (str): Rol en el equipo
             password (str): Contraseña (por defecto 123456 para demo)
-            disponibilidad (int): Porcentaje de disponibilidad (0-100)
             activo (bool): Si el usuario está activo en el sistema
         """
         self.id = id
@@ -17,7 +16,6 @@ class User:
         self.email = email
         self.rol = rol
         self.password = password  # Contraseña simple para demo
-        self.disponibilidad = disponibilidad
         self.activo = activo
         self.tareas_asignadas = []
     
@@ -29,7 +27,6 @@ class User:
             "email": self.email,
             "rol": self.rol,
             "password": self.password,
-            "disponibilidad": self.disponibilidad,
             "activo": self.activo,
             "tareas_asignadas": self.tareas_asignadas
         }
@@ -64,15 +61,3 @@ class User:
                 carga += tarea.puntos
         
         return carga
-    
-    def disponibilidad_real(self, tasks_data):
-        """Calcula la disponibilidad real considerando carga actual"""
-        carga_actual = self.carga_trabajo_actual(tasks_data)
-        # Suponemos que 10 puntos = 100% de disponibilidad
-        disponibilidad_real = max(0, self.disponibilidad - (carga_actual * 10))
-        return disponibilidad_real
-    
-    def puede_tomar_tarea(self, puntos_tarea, tasks_data):
-        """Verifica si el usuario puede tomar una nueva tarea"""
-        disponibilidad_real = self.disponibilidad_real(tasks_data)
-        return (puntos_tarea * 10) <= disponibilidad_real

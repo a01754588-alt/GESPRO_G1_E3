@@ -35,7 +35,6 @@ def _cargar_usuarios():
                         u['email'],
                         u['rol'],
                         u.get('password', '123456'),  # Contraseña por defecto
-                        u.get('disponibilidad', 100),
                         u.get('activo', True)
                     )
                     # Cargar tareas asignadas si existen
@@ -46,17 +45,17 @@ def _cargar_usuarios():
     except Exception as e:
         print(f"Error cargando usuarios: {e}")
     
-    # Datos iniciales de ejemplo con contraseñas
+    # Datos iniciales de ejemplo con contraseñas (sin disponibilidad)
     return [
-        User(1, "Ana García", "ana@empresa.com", "Product Owner (PO)", "ana123", 100),
-        User(2, "Carlos Rodríguez", "carlos@empresa.com", "Agile Leader / Scrum Master", "carlos123", 100),
-        User(3, "Luis Fernández", "luis@empresa.com", "Desarrollador Backend", "luis123", 80),
-        User(4, "María López", "maria@empresa.com", "Desarrollador Frontend", "maria123", 90),
-        User(5, "Pedro Martínez", "pedro@empresa.com", "Desarrollador Full Stack", "pedro123", 70),
-        User(6, "Laura Sánchez", "laura@empresa.com", "Diseñador UX/UI", "laura123", 60),
-        User(7, "Jorge Ramírez", "jorge@empresa.com", "QA / Tester", "jorge123", 85),
-        User(8, "Sofía Castro", "sofia@empresa.com", "DevOps Engineer", "sofia123", 75),
-        User(9, "David Torres", "david@empresa.com", "Invitado", "david123", 0)
+        User(1, "Ana García", "ana@empresa.com", "Product Owner (PO)", "ana123"),
+        User(2, "Carlos Rodríguez", "carlos@empresa.com", "Agile Leader / Scrum Master", "carlos123"),
+        User(3, "Luis Fernández", "luis@empresa.com", "Desarrollador Backend", "luis123"),
+        User(4, "María López", "maria@empresa.com", "Desarrollador Frontend", "maria123"),
+        User(5, "Pedro Martínez", "pedro@empresa.com", "Desarrollador Full Stack", "pedro123"),
+        User(6, "Laura Sánchez", "laura@empresa.com", "Diseñador UX/UI", "laura123"),
+        User(7, "Jorge Ramírez", "jorge@empresa.com", "QA / Tester", "jorge123"),
+        User(8, "Sofía Castro", "sofia@empresa.com", "DevOps Engineer", "sofia123"),
+        User(9, "David Torres", "david@empresa.com", "Invitado", "david123")
     ]
 
 def _guardar_usuarios(usuarios):
@@ -99,27 +98,11 @@ def authenticate_user(email, password):
         return user
     return None
 
-def get_user_by_name(name):
-    """Obtiene un usuario por su nombre (búsqueda parcial)"""
-    name_lower = name.lower()
-    for user in _users:
-        if name_lower in user.nombre.lower():
-            return user
-    return None
-
-def get_users_by_role(rol):
-    """Obtiene usuarios por rol"""
-    return [u for u in _users if u.rol == rol]
-
-def get_available_users():
-    """Obtiene usuarios con disponibilidad > 0"""
-    return [u for u in _users if u.disponibilidad > 0]
-
 def get_roles():
     """Obtiene la lista de roles disponibles"""
     return ROLES_DISPONIBLES
 
-def add_user(nombre, email, rol, disponibilidad=100):
+def add_user(nombre, email, rol):
     """Agrega un nuevo usuario"""
     global _next_user_id, _users
     
@@ -127,12 +110,8 @@ def add_user(nombre, email, rol, disponibilidad=100):
     if rol not in ROLES_DISPONIBLES:
         raise ValueError(f"Rol inválido. Roles disponibles: {', '.join(ROLES_DISPONIBLES)}")
     
-    # Validar disponibilidad
-    if disponibilidad < 0 or disponibilidad > 100:
-        raise ValueError("La disponibilidad debe estar entre 0 y 100")
-    
     # Crear nuevo usuario
-    nuevo_usuario = User(_next_user_id, nombre, email, rol, disponibilidad)
+    nuevo_usuario = User(_next_user_id, nombre, email, rol)
     _next_user_id += 1
     _users.append(nuevo_usuario)
     _guardar_usuarios(_users)
@@ -154,11 +133,8 @@ def update_user(user_id, nuevos_datos):
                 if nuevos_datos['rol'] not in ROLES_DISPONIBLES:
                     raise ValueError(f"Rol inválido. Roles disponibles: {', '.join(ROLES_DISPONIBLES)}")
                 user.rol = nuevos_datos['rol']
-            if 'disponibilidad' in nuevos_datos:
-                disponibilidad = nuevos_datos['disponibilidad']
-                if disponibilidad < 0 or disponibilidad > 100:
-                    raise ValueError("La disponibilidad debe estar entre 0 y 100")
-                user.disponibilidad = disponibilidad
+            if 'password' in nuevos_datos:
+                user.password = nuevos_datos['password']
             
             _guardar_usuarios(_users)
             return user
@@ -182,58 +158,16 @@ def delete_user(user_id):
         return True
     return False
 
-def assign_task_to_user(user_id, task_id):
-    """Asigna una tarea a un usuario"""
-    user = get_user_by_id(user_id)
-    if user:
-        user.asignar_tarea(task_id)
-        _guardar_usuarios(_users)
-        return True
-    return False
-
-def remove_task_from_user(user_id, task_id):
-    """Remueve una tarea de un usuario"""
-    user = get_user_by_id(user_id)
-    if user:
-        user.remover_tarea(task_id)
-        _guardar_usuarios(_users)
-        return True
-    return False
-
-def get_users_with_tasks():
-    """Obtiene usuarios con sus tareas asignadas"""
-    from data.task_data import get_tasks
-    tareas = get_tasks()
-    
-    usuarios_info = []
-    for user in _users:
-        tareas_usuario = []
-        for task_id in user.tareas_asignadas:
-            tarea = next((t for t in tareas if t.id == task_id), None)
-            if tarea:
-                tareas_usuario.append(tarea.to_dict())
-        
-        usuario_info = user.to_dict()
-        usuario_info['tareas_detalle'] = tareas_usuario
-        usuario_info['carga_actual'] = user.carga_trabajo_actual(tareas)
-        usuario_info['disponibilidad_real'] = user.disponibilidad_real(tareas)
-        
-        usuarios_info.append(usuario_info)
-    
-    return usuarios_info
+def get_usuarios_asignables():
+    """Obtiene usuarios que pueden ser asignados a tareas"""
+    return [user for user in _users if user.activo and user.rol != "Invitado"]
 
 def get_user_stats():
     """Obtiene estadísticas de usuarios"""
-    from data.task_data import get_tasks
-    tareas = get_tasks()
-    
     stats = {
         'total_usuarios': len(_users),
-        'usuarios_activos': len([u for u in _users if u.disponibilidad > 0]),
-        'usuarios_por_rol': {},
-        'carga_total': 0,
-        'disponibilidad_total': 0,
-        'usuarios_sobrecargados': []
+        'usuarios_activos': len([u for u in _users if u.activo]),
+        'usuarios_por_rol': {}
     }
     
     # Usuarios por rol
@@ -244,55 +178,4 @@ def get_user_stats():
         else:
             stats['usuarios_por_rol'][rol] = 1
     
-    # Carga y disponibilidad
-    for user in _users:
-        carga = user.carga_trabajo_actual(tareas)
-        stats['carga_total'] += carga
-        stats['disponibilidad_total'] += user.disponibilidad_real(tareas)
-        
-        # Verificar sobrecarga (más del 80% de disponibilidad usada)
-        if user.disponibilidad > 0:
-            porcentaje_uso = (carga * 10) / user.disponibilidad * 100
-            if porcentaje_uso > 80:
-                stats['usuarios_sobrecargados'].append({
-                    'id': user.id,
-                    'nombre': user.nombre,
-                    'rol': user.rol,
-                    'porcentaje_uso': round(porcentaje_uso, 1)
-                })
-    
-    stats['carga_promedio'] = stats['carga_total'] / len(_users) if _users else 0
-    stats['disponibilidad_promedio'] = stats['disponibilidad_total'] / len(_users) if _users else 0
-    
     return stats
-
-def get_suggested_users_for_task(puntos_tarea, estado=None, rol_preferido=None):
-    """Sugiere usuarios adecuados para una tarea"""
-    from data.task_data import get_tasks
-    tareas = get_tasks()
-    
-    usuarios_sugeridos = []
-    
-    for user in _users:
-        # Filtrar por rol si se especifica
-        if rol_preferido and user.rol != rol_preferido:
-            continue
-        
-        # Verificar si puede tomar la tarea
-        if user.puede_tomar_tarea(puntos_tarea, tareas):
-            info_usuario = user.to_dict()
-            info_usuario['disponibilidad_real'] = user.disponibilidad_real(tareas)
-            info_usuario['carga_actual'] = user.carga_trabajo_actual(tareas)
-            
-            # Calcular prioridad (mayor disponibilidad = mayor prioridad)
-            prioridad = user.disponibilidad_real(tareas)
-            
-            usuarios_sugeridos.append({
-                'usuario': info_usuario,
-                'prioridad': prioridad
-            })
-    
-    # Ordenar por prioridad (mayor a menor)
-    usuarios_sugeridos.sort(key=lambda x: x['prioridad'], reverse=True)
-    
-    return [item['usuario'] for item in usuarios_sugeridos]

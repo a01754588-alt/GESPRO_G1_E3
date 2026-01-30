@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Tareas</title>
     <style>
-        * {
+                * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -15,12 +15,136 @@
         body {
             background: #f0f2f5;
             min-height: 100vh;
+            display: flex; /* Añadido: para usar flexbox */
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: linear-gradient(180deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            padding: 20px 0;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .logo {
+            padding: 0 20px 30px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .menu {
+            padding: 0 10px;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #b0b7c3;
+            text-decoration: none;
+        }
+
+        .menu-item:hover {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+
+        .menu-item.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .user-info {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            padding: 15px 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: #b0b7c3;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: background 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            margin-left: 150px; /* Espacio para el sidebar */
+            margin-right: 60px;
+            min-height: 100vh;
+            background: #f0f2f5;
             padding: 20px;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
+            margin: 0;
+            margin-left: 100px;
+            margin-right: 100px;
+
         }
 
         header {
@@ -283,7 +407,7 @@
             width: 100%;
             height: 100%;
             background: rgba(0,0,0,0.5);
-            z-index: 1000;
+            z-index: 2000; /* Más alto que el sidebar */
             align-items: center;
             justify-content: center;
         }
@@ -379,6 +503,24 @@
             .tablero {
                 grid-template-columns: 1fr;
             }
+            
+            .sidebar {
+                width: 70px;
+            }
+            
+            .sidebar span:not(.logo span:first-child) {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 200px;
+                display: flex;
+                justify-content: center;
+            }
+            
+            .user-details, .logout-btn {
+                display: none;
+            }
         }
 
         /* Notificación */
@@ -392,7 +534,7 @@
             border-radius: 5px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             display: none;
-            z-index: 1000;
+            z-index: 2001; /* Más alto que el modal */
             animation: slideIn 0.3s ease-out;
         }
 
@@ -645,6 +787,46 @@
     </style>
 </head>
 <body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <h1><i class="fas fa-tasks"></i> <span>KanbanFlow</span></h1>
+        </div>
+        
+        <div class="menu">
+            <a href="/" class="menu-item active">
+                <i class="fas fa-columns"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="/usuarios" class="menu-item">
+                <i class="fas fa-users"></i>
+                <span>Personas</span>
+            </a>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-avatar" id="user-avatar">U</div>
+            <div class="user-details">
+                <div class="user-name" id="user-name">Usuario</div>
+                <div class="user-role" id="user-role">Rol</div>
+            </div>
+            <button class="logout-btn" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de edición (el que ya tenías) -->
+    <div id="modal-edicion" class="modal">
+        <!-- ... tu modal de edición de tareas existente ... -->
+    </div>
+
+    <!-- Notificación flotante -->
+    <div id="notificacion" class="notificacion"></div>
+
+    <div class="main-content">
+        <!-- ... todo el contenido actual de tu index.html ... -->
+    </div>
     <!-- Modal de edición -->
     <div id="modal-edicion" class="modal">
         <div class="modal-contenido">
@@ -669,7 +851,10 @@
                 </div>
                 <div class="modal-form-group">
                     <label for="editar-asignado">Asignado a</label>
-                    <input type="text" id="editar-asignado" placeholder="Nombre del responsable">
+                    <select id="editar-asignado">
+                        <option value="">Sin asignar</option>
+                        <!-- Los usuarios se cargarán dinámicamente -->
+                    </select>
                 </div>
                 <div class="modal-form-group">
                     <label for="editar-estado">Estado</label>
@@ -719,7 +904,10 @@
                 
                 <div class="form-group">
                     <label for="asignado">Asignado a</label>
-                    <input type="text" id="asignado" placeholder="Ej: Juan">
+                    <select id="asignado">
+                        <option value="">Sin asignar</option>
+                        <!-- Los usuarios se cargarán dinámicamente -->
+                    </select>
                 </div>
                 
                 <div class="form-group">
@@ -835,6 +1023,56 @@
     </div>
 
     <script>
+
+        // Agrega estas funciones al inicio de tu script
+        async function cargarUsuarioActual() {
+            try {
+                const response = await fetch('/api/current-user');
+                if (response.ok) {
+                    const usuario = await response.json();
+                    
+                    // Mostrar información del usuario en el sidebar
+                    document.getElementById('user-name').textContent = usuario.nombre;
+                    document.getElementById('user-role').textContent = usuario.rol;
+                    
+                    // Actualizar avatar con iniciales
+                    const iniciales = obtenerIniciales(usuario.nombre);
+                    document.getElementById('user-avatar').textContent = iniciales;
+                    
+                } else {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error cargando usuario:', error);
+                window.location.href = '/login';
+            }
+        }
+        
+        function obtenerIniciales(nombre) {
+            return nombre
+                .split(' ')
+                .map(palabra => palabra[0])
+                .join('')
+                .toUpperCase()
+                .substring(0, 2);
+        }
+        
+        function logout() {
+            if (confirm('¿Estás seguro de que quieres salir?')) {
+                fetch('/logout')
+                    .then(() => {
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('loggedIn');
+                        window.location.href = '/login';
+                    });
+            }
+        }
+        
+        // Cargar usuario al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarUsuarioActual();
+            // ... el resto de tu código de inicialización ...
+        })
         // Estado global
         let tareas = [];
         let ordenColumnas = {
@@ -1500,6 +1738,40 @@
             if (e.target.id === 'modal-edicion') {
                 cerrarModal();
             }
+        });
+        // Cargar usuarios para asignar en tareas
+        async function cargarUsuariosParaAsignar() {
+            try {
+                const response = await fetch('/api/usuarios/asignables');
+                if (response.ok) {
+                    const usuarios = await response.json();
+                    
+                    // Actualizar select en formulario principal
+                    const selectAsignado = document.getElementById('asignado');
+                    selectAsignado.innerHTML = '<option value="">Sin asignar</option>';
+                    
+                    // Actualizar select en modal de edición
+                    const selectEditarAsignado = document.getElementById('editar-asignado');
+                    selectEditarAsignado.innerHTML = '<option value="">Sin asignar</option>';
+                    
+                    usuarios.forEach(usuario => {
+                        const option = document.createElement('option');
+                        option.value = usuario.nombre;
+                        option.textContent = `${usuario.nombre} (${usuario.rol} )`;
+                        
+                        selectAsignado.appendChild(option.cloneNode(true));
+                        selectEditarAsignado.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+            }
+        }
+
+        // Llamar esta función al cargar la página
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarUsuariosParaAsignar();
+            // ... resto de tu código
         });
     </script>
 </body>
