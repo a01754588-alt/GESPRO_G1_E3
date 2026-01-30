@@ -10,6 +10,7 @@ Backend/models/__pycache__/
 
 # Archivo de datos de la aplicación
 tasks.json
+users.json
 
 # VS Code
 .vscode/
