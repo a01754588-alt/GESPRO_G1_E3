@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestor de Tareas</title>
     <style>
-                * {
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -133,18 +133,14 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: 150px; /* Espacio para el sidebar */
-            margin-right: 60px;
-            min-height: 100vh;
-            background: #f0f2f5;
+            margin-left: 250px; /* Mismo ancho que el sidebar */
             padding: 20px;
+            background: #f0f2f5;
+            min-height: 100vh;
         }
 
         .container {
             margin: 0;
-            margin-left: 100px;
-            margin-right: 100px;
-
         }
 
         header {
@@ -380,17 +376,6 @@
             background: #c82333;
         }
 
-        .tarea-acciones-superiores {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 8px;
-        }
-
-        .tarea-acciones-superiores button {
-            padding: 4px 8px;
-            font-size: 0.8rem;
-        }
-
         .mensaje-vacio {
             text-align: center;
             color: #888;
@@ -513,9 +498,7 @@
             }
             
             .main-content {
-                margin-left: 200px;
-                display: flex;
-                justify-content: center;
+                margin-left: 70px;
             }
             
             .user-details, .logout-btn {
@@ -785,6 +768,7 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- Sidebar -->
@@ -816,18 +800,157 @@
         </div>
     </div>
 
-    <!-- Modal de edición (el que ya tenías) -->
-    <div id="modal-edicion" class="modal">
-        <!-- ... tu modal de edición de tareas existente ... -->
-    </div>
-
-    <!-- Notificación flotante -->
-    <div id="notificacion" class="notificacion"></div>
-
+    <!-- Main Content -->
     <div class="main-content">
-        <!-- ... todo el contenido actual de tu index.html ... -->
+        <div class="container">
+            <header>
+                <h1>📋 Gestor de Tareas Kanban</h1>
+                <p>Organiza, prioriza y controla el trabajo en progreso con límite flexible</p>
+            </header>
+
+            <!-- Formulario -->
+            <div class="form-card">
+                <div class="form-title">➕ Nueva Tarea</div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="titulo">Título de la tarea *</label>
+                        <input type="text" id="titulo" placeholder="Ej: Revisar documentación" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="puntos">Puntos (1-10)</label>
+                        <input type="number" id="puntos" min="1" max="10" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tiempo">Tiempo estimado (minutos)</label>
+                        <input type="number" id="tiempo" min="5" max="480" value="60">
+                        <small>5-480 min (8h)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="asignado">Asignado a</label>
+                        <select id="asignado">
+                            <option value="">Sin asignar</option>
+                            <!-- Los usuarios se cargarán dinámicamente -->
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estado">Estado inicial</label>
+                        <select id="estado">
+                            <option value="TODO">TODO</option>
+                            <option value="IN_PROGRESS">IN PROGRESS</option>
+                            <option value="DONE">DONE</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button class="btn-crear" onclick="crearTarea()">
+                    ➕ Crear Tarea
+                </button>
+            </div>
+
+            <!-- Contadores y WIP -->
+            <div class="contadores-container">
+                <div class="contador-tareas" id="contador-tareas">
+                    📊 Total: 0 tareas | TODO: 0 | IN PROGRESS: 0 | DONE: 0
+                </div>
+                <div class="tiempo-total" id="tiempo-total">
+                    ⏱️ Tiempo total estimado: 0 minutos
+                </div>
+                <div class="wip-container" id="wip-container">
+                    <div class="wip-header">
+                        <span>🚦 Límite WIP Flexible</span>
+                    </div>
+                    <div class="wip-limite">
+                        <span>Límite base:</span>
+                        <input type="number" id="wip-limit" class="wip-input" min="1" max="20" value="5">
+                        <button class="btn-wip" onclick="actualizarWIP()">Actualizar</button>
+                    </div>
+                    <div class="wip-info">
+                        <span>Límite flexible: <span id="wip-flexible" class="wip-flexible">5 (+10% = 5)</span></span>
+                    </div>
+                    <div class="wip-actual">
+                        <span>Tareas en progreso:</span>
+                        <span id="wip-actual" class="wip-value">0</span>
+                    </div>
+                    <div class="wip-actual">
+                        <span>Porcentaje (base):</span>
+                        <span id="wip-porcentaje" class="wip-value">0%</span>
+                    </div>
+                    <div class="wip-progress-bar">
+                        <div id="wip-progress-fill" class="wip-progress-fill" style="width: 0%"></div>
+                        <div id="wip-marker-base" class="wip-progress-marker" style="left: 100%"></div>
+                        <div id="wip-marker-flexible" class="wip-progress-marker" style="left: 110%"></div>
+                    </div>
+                    <div id="wip-status" class="wip-status wip-status-ok">
+                        ✅ Dentro del límite base
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablero Kanban -->
+            <div class="tablero">
+                <!-- Columna TODO -->
+                <div class="columna todo">
+                    <div class="orden-control">
+                        <div class="columna-header">📝 TODO</div>
+                        <div class="orden-selector">
+                            <select id="orden-todo" onchange="cambiarOrden('TODO', this.value)">
+                                <option value="tiempo-desc">Mayor tiempo primero</option>
+                                <option value="tiempo-asc">Menor tiempo primero</option>
+                                <option value="puntos-desc">Mayor puntos primero</option>
+                                <option value="puntos-asc">Menor puntos primero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lista-todo" class="tareas-columna">
+                        <!-- Tareas TODO se cargarán aquí -->
+                    </div>
+                </div>
+
+                <!-- Columna IN PROGRESS -->
+                <div class="columna progress">
+                    <div class="orden-control">
+                        <div class="columna-header">⚙️ IN PROGRESS</div>
+                        <div class="orden-selector">
+                            <select id="orden-progress" onchange="cambiarOrden('IN_PROGRESS', this.value)">
+                                <option value="tiempo-desc">Mayor tiempo primero</option>
+                                <option value="tiempo-asc">Menor tiempo primero</option>
+                                <option value="puntos-desc">Mayor puntos primero</option>
+                                <option value="puntos-asc">Menor puntos primero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lista-progress" class="tareas-columna">
+                        <!-- Tareas IN PROGRESS se cargarán aquí -->
+                    </div>
+                </div>
+
+                <!-- Columna DONE -->
+                <div class="columna done">
+                    <div class="orden-control">
+                        <div class="columna-header">✅ DONE</div>
+                        <div class="orden-selector">
+                            <select id="orden-done" onchange="cambiarOrden('DONE', this.value)">
+                                <option value="tiempo-desc">Mayor tiempo primero</option>
+                                <option value="tiempo-asc">Menor tiempo primero</option>
+                                <option value="puntos-desc">Mayor puntos primero</option>
+                                <option value="puntos-asc">Menor puntos primero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="lista-done" class="tareas-columna">
+                        <!-- Tareas DONE se cargarán aquí -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <!-- Modal de edición -->
+
+    <!-- Modal de edición - SOLO UNO -->
     <div id="modal-edicion" class="modal">
         <div class="modal-contenido">
             <div class="modal-header">
@@ -872,155 +995,8 @@
         </div>
     </div>
 
-    <!-- Notificación flotante -->
+    <!-- Notificación flotante - SOLO UNO -->
     <div id="notificacion" class="notificacion"></div>
-
-    <div class="container">
-        <header>
-            <h1>📋 Gestor de Tareas Kanban</h1>
-            <p>Organiza, prioriza y controla el trabajo en progreso con límite flexible</p>
-        </header>
-
-        <!-- Formulario -->
-        <div class="form-card">
-            <div class="form-title">➕ Nueva Tarea</div>
-            
-            <div class="form-grid">
-                <div class="form-group">
-                    <label for="titulo">Título de la tarea *</label>
-                    <input type="text" id="titulo" placeholder="Ej: Revisar documentación" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="puntos">Puntos (1-10)</label>
-                    <input type="number" id="puntos" min="1" max="10" value="1">
-                </div>
-                
-                <div class="form-group">
-                    <label for="tiempo">Tiempo estimado (minutos)</label>
-                    <input type="number" id="tiempo" min="5" max="480" value="60">
-                    <small>5-480 min (8h)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label for="asignado">Asignado a</label>
-                    <select id="asignado">
-                        <option value="">Sin asignar</option>
-                        <!-- Los usuarios se cargarán dinámicamente -->
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="estado">Estado inicial</label>
-                    <select id="estado">
-                        <option value="TODO">TODO</option>
-                        <option value="IN_PROGRESS">IN PROGRESS</option>
-                        <option value="DONE">DONE</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button class="btn-crear" onclick="crearTarea()">
-                ➕ Crear Tarea
-            </button>
-        </div>
-
-        <!-- Contadores y WIP -->
-        <div class="contadores-container">
-            <div class="contador-tareas" id="contador-tareas">
-                📊 Total: 0 tareas | TODO: 0 | IN PROGRESS: 0 | DONE: 0
-            </div>
-            <div class="tiempo-total" id="tiempo-total">
-                ⏱️ Tiempo total estimado: 0 minutos
-            </div>
-            <div class="wip-container" id="wip-container">
-                <div class="wip-header">
-                    <span>🚦 Límite WIP Flexible</span>
-                </div>
-                <div class="wip-limite">
-                    <span>Límite base:</span>
-                    <input type="number" id="wip-limit" class="wip-input" min="1" max="20" value="5">
-                    <button class="btn-wip" onclick="actualizarWIP()">Actualizar</button>
-                </div>
-                <div class="wip-info">
-                    <span>Límite flexible: <span id="wip-flexible" class="wip-flexible">5 (+10% = 5)</span></span>
-                </div>
-                <div class="wip-actual">
-                    <span>Tareas en progreso:</span>
-                    <span id="wip-actual" class="wip-value">0</span>
-                </div>
-                <div class="wip-actual">
-                    <span>Porcentaje (base):</span>
-                    <span id="wip-porcentaje" class="wip-value">0%</span>
-                </div>
-                <div class="wip-progress-bar">
-                    <div id="wip-progress-fill" class="wip-progress-fill" style="width: 0%"></div>
-                    <div id="wip-marker-base" class="wip-progress-marker" style="left: 100%"></div>
-                    <div id="wip-marker-flexible" class="wip-progress-marker" style="left: 110%"></div>
-                </div>
-                <div id="wip-status" class="wip-status wip-status-ok">
-                    ✅ Dentro del límite base
-                </div>
-            </div>
-        </div>
-
-        <!-- Tablero Kanban -->
-        <div class="tablero">
-            <!-- Columna TODO -->
-            <div class="columna todo">
-                <div class="orden-control">
-                    <div class="columna-header">📝 TODO</div>
-                    <div class="orden-selector">
-                        <select id="orden-todo" onchange="cambiarOrden('TODO', this.value)">
-                            <option value="tiempo-desc">Mayor tiempo primero</option>
-                            <option value="tiempo-asc">Menor tiempo primero</option>
-                            <option value="puntos-desc">Mayor puntos primero</option>
-                            <option value="puntos-asc">Menor puntos primero</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="lista-todo" class="tareas-columna">
-                    <!-- Tareas TODO se cargarán aquí -->
-                </div>
-            </div>
-
-            <!-- Columna IN PROGRESS -->
-            <div class="columna progress">
-                <div class="orden-control">
-                    <div class="columna-header">⚙️ IN PROGRESS</div>
-                    <div class="orden-selector">
-                        <select id="orden-progress" onchange="cambiarOrden('IN_PROGRESS', this.value)">
-                            <option value="tiempo-desc">Mayor tiempo primero</option>
-                            <option value="tiempo-asc">Menor tiempo primero</option>
-                            <option value="puntos-desc">Mayor puntos primero</option>
-                            <option value="puntos-asc">Menor puntos primero</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="lista-progress" class="tareas-columna">
-                    <!-- Tareas IN PROGRESS se cargarán aquí -->
-                </div>
-            </div>
-
-            <!-- Columna DONE -->
-            <div class="columna done">
-                <div class="orden-control">
-                    <div class="columna-header">✅ DONE</div>
-                    <div class="orden-selector">
-                        <select id="orden-done" onchange="cambiarOrden('DONE', this.value)">
-                            <option value="tiempo-desc">Mayor tiempo primero</option>
-                            <option value="tiempo-asc">Menor tiempo primero</option>
-                            <option value="puntos-desc">Mayor puntos primero</option>
-                            <option value="puntos-asc">Menor puntos primero</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="lista-done" class="tareas-columna">
-                    <!-- Tareas DONE se cargarán aquí -->
-                </div>
-            </div>
-        </div>
-    </div>
 
     <script>
 
